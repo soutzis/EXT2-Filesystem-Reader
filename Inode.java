@@ -77,42 +77,49 @@ public class Inode
   public String readPermissions()
   {
     String permissions = "";
-    if((i_mode & IFSCK) == i_mode) permissions="socket";
-    if((i_mode & IFLNK) == i_mode) permissions="symbolic link";
-    if((i_mode & IFREG) == i_mode)
+
+    if(((int)i_mode & IFSCK) == IFSCK) permissions="socket";
+    if(((int)i_mode & IFLNK) == IFLNK) permissions="symbolic link";
+    if(((int)i_mode & IFREG) == IFREG)
     {
-      permissions="-";
+      permissions = "-";
       reg_file = true;
     }
-    if((i_mode & IFBLK) == i_mode) permissions="block device";
-    if((i_mode & IFDIR) == i_mode) permissions="d";
-    if((i_mode & IFCHR) == i_mode) permissions="c";
-    if((i_mode & IFIFO) == i_mode) permissions="fifo";
+    if(((int)i_mode & IFBLK) == IFBLK) permissions="block device";
+    if(((int)i_mode & IFDIR) == IFDIR) permissions="d";
+    if(((int)i_mode & IFCHR) == IFCHR) permissions="c";
+    if(((int)i_mode & IFIFO) == IFIFO) permissions="fifo";
 
-    if((i_mode & IRUSR) == i_mode) permissions+="r"; else permissions+="-";
-    if((i_mode & IWUSR) == i_mode) permissions+="w"; else permissions+="-";
-    if((i_mode & IXUSR) == i_mode) permissions+="x";
-    if((i_mode & ISUID) == i_mode)
+    if(((int)i_mode & IRUSR) == IRUSR) permissions+="r"; else permissions+="-";
+    if(((int)i_mode & IWUSR) == IWUSR) permissions+="w"; else permissions+="-";
+    if(((int)i_mode & IXUSR) == IXUSR) permissions+="x";
+    if(((int)i_mode & ISUID) == ISUID)
     {
       if(permissions.endsWith("x"))
+      {
         permissions = permissions.substring(0, permissions.length() - 1);
-      permissions+="s";
-    } else permissions+="-";
-    if((i_mode & IRGRP) == i_mode) permissions+="r"; else permissions+="-";
-    if((i_mode & IWGRP) == i_mode) permissions+="w"; else permissions+="-";
-    if((i_mode & IXGRP) == i_mode) permissions+="x";
-    if((i_mode & ISGID) == i_mode)
+        permissions+="s";
+      }
+      else permissions+="-";
+    }
+    if(((int)i_mode & IRGRP) == IRGRP) permissions+="r"; else permissions+="-";
+    if(((int)i_mode & IWGRP) == IWGRP) permissions+="w"; else permissions+="-";
+    if(((int)i_mode & IXGRP) == IXGRP) permissions+="x";
+    if(((int)i_mode & ISGID) == ISGID)
     {
       if(permissions.endsWith("x"))
+      {
         permissions = permissions.substring(0, permissions.length() - 1);
-      permissions+="s";
-    } else permissions+="-";
-    if((i_mode & IROTH) == i_mode) permissions+="r"; else permissions+="-";
-    if((i_mode & IWOTH) == i_mode) permissions+="w"; else permissions+="-";
-    if((i_mode & IXOTH) == i_mode) permissions+="x"; else permissions+="-";
-    if((i_mode & ISVTX) == i_mode) permissions+="t";
+        permissions+="s";
+      }
+      else permissions+="-";
+    }
+    if(((int)i_mode & IROTH) == IROTH) permissions+="r"; else permissions+="-";
+    if(((int)i_mode & IWOTH) == IWOTH) permissions+="w"; else permissions+="-";
+    if(((int)i_mode & IXOTH) == IXOTH) permissions+="x"; else permissions+="-";
+    if(((int)i_mode & ISVTX) == ISVTX) permissions+="t";
 
-    return permissions;
+    return file_permissions = permissions;
   }
 
   public int[] getBlockPointers()
@@ -132,7 +139,7 @@ public class Inode
     else return "group";
 	}
 
-  public int getSizeLower()
+  public int getSize()
   {
 		return i_size_lower;
 	}

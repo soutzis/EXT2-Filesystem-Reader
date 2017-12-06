@@ -6,8 +6,12 @@ public class Driver
   static Ext2File ext2;
   static Superblock sblock;
   static GroupDescriptor gdesc;
+  static Directory direct;
+  static Inode inode;
   static int block_location;
   static byte[] data;
+  static String path;
+  static final int root_inode = 2;
   static final int block_size = 1024;
   static final long superblock_offset = 1024;
   static final long gdescriptor_offset = 2048;
@@ -42,17 +46,27 @@ public class Driver
   //public static
   public static void main (String[] args) throws IOException
   {
+    long inode_size;
     vol = new Volume("ext2fs");
-    ext2 = new Ext2File(vol, "petros");
+    ext2 = new Ext2File(vol, "/");
+    path = ext2.getPath();
+    System.out.println(path);
     data = ext2.read(superblock_offset, block_size);
     System.out.println(ext2.size()+" bytes");
     sblock = new Superblock(data);
     sblock.read();
+    inode_size = sblock.getInodeSize();
     int block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup());
     data = ext2.read(gdescriptor_offset,block_size);
     gdesc = new GroupDescriptor(data, block_group_count);
     gdesc.read();
-    block_location = getContainingBLock(2);
+    block_location = getContainingBLock(root_inode);
+
+    data = ext2.read(block_location, inode_size);
+    inode = new Inode(data);
+    inode.read();
+    FileInfo info = new FileInfo(inode, path);
+    info.checkPathName();
     /*Inode inode = new Inode(data);
     data = ext2.read((long)rootInfo_inode, 128);
     inode.read();

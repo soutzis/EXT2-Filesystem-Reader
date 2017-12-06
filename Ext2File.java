@@ -6,11 +6,6 @@ public class Ext2File
 {
   private Volume vol;
   private RandomAccessFile raf;
-  //private ByteBuffer buffer;
-  //private long buffer_pointer;
-  //private long file_length;
-  //private Superblock s_block;
-  //private int block_group_count;
   private String filename = "ext2fs";
   private String path;
 
@@ -26,10 +21,6 @@ public class Ext2File
     byte[] data = new byte[(int) length];
     seek(startByte);
     raf.read(data);
-    //raf.readFully(data);
-    //buffer_pointer = raf.getFilePointer();
-    //getPosition();           //needed
-    //System.out.println("Buffer pointer in read(startByte, length) is: "+buffer_pointer);
 
     return data;
   }
@@ -39,9 +30,6 @@ public class Ext2File
     byte[] data = new byte[(int)length];
     seek(position());
     raf.read(data);
-    //raf.readFully(data);
-    //buffer_pointer = raf.getFilePointer();
-    //getPosition(); //needed
 
     return data;
   }
@@ -59,5 +47,10 @@ public class Ext2File
   public long size() throws IOException
   {
     return vol.getLength();
+  }
+
+  public String getPath()
+  {
+    return path;
   }
 }
