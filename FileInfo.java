@@ -5,74 +5,88 @@ import java.util.*;
 public class FileInfo
 {
   private Inode inode;
-  private int inode_index, counter, size, path_offset;
+  private int inode_index, counter, size, inode_of_path, new_offset;
   private final int block_size = 1024;
   private final int inode_size = 128;
   private int[] block_pointers;
-  private short length, links_count;
-  private String permissions, name, u_id, g_id, path;
+  private short length, links_count, rec_length;
+  private String permissions, name, u_id, g_id, path_name;
   private Date date;
   private String[] split_path;
-  private byte[] char_bytes;
-  public FileInfo(Inode inode, String path) throws IOException
+  private byte name_length;
+  private byte[] char_bytes, inode_data;
+  private boolean dataexists = true;
+  private boolean reg_file;
+  public FileInfo(Inode inode, String[] path) throws IOException
   {
     this.inode = inode;
-    this.path = path;
-  	if (path.equals("/"))
-      path += ".";
-    split_path = path.split("/");
+    split_path = path;
+    //inode_of_path = Driver.root_inode;
   }
 
-  public void checkPathName() throws IOException
+  public void getFileInfo() throws IOException
   {
     for(int i=1; i<split_path.length; i++)
     {
       findPath(split_path[i]);
-      if(path_offset == 0)
+      if(inode_of_path == 0)
       {
         System.out.println("BAD PATH - NO DATA FOUND");
+        dataexists = false;
         break;
       }
-      double new_offset = Driver.getContainingBLock(path_offset);
-      //int new_offset = (int) block
-      byte[] inode_data = Driver.ext2.read((long)new_offset, inode_size);
+      new_offset = Driver.getContainingBLock(inode_of_path);
+      //System.out.println((long)new_offset);
+
+      inode_data = Driver.ext2.read(new_offset, inode_size);
       inode = new Inode(inode_data);
       inode.read();
-
+      reg_file = inode.isFile();
     }
-    //FileInfo f = new FileInfo(inode);
-    readBlockData(inode);
+    if(dataexists)
+      readBlockData(inode);
   }
 
   public int findPath(String path) throws IOException
   {
-    int[] block_pointers = inode.getBlockPointers();
-    short name_length;
+    block_pointers = inode.getBlockPointers();
+    inode_of_path = 0;
 
     for (int i=0; i<12; i++)
     {
-      if(block_pointers[i]!= 0)
+      if(block_pointers[i] != 0)
       {
-        byte[] data = Driver.ext2.read((block_pointers[i])*block_size, block_size);
+        byte[] data = Driver.ext2.read((block_pointers[i]*block_size), block_size); //multiplaying by block size to get the correct offset
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
+        rec_length = buffer.getShort(4);
+        System.out.println("directory length is: "+rec_length);
+        name_length = buffer.get(6);
+        System.out.println("name length is: "+name_length);
 
-        for(int j=0; j<buffer.limit(); j+=name_length)
+        for(int j=0; j<buffer.limit(); j+=rec_length)
         {
-          name_length = buffer.getShort(i+4);
-          char_bytes = new byte[name_length-8];   //because length is a short, but the data for name is stored in just 1 byte. (check http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html Q6)
+          rec_length = buffer.getShort(j+4);  //fetching this value to jump to the next dir
+          name_length = buffer.get(j+6);
+          char_bytes = new byte[name_length];   //because length of the name is stored in a byte (check http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html Q6)
           for(int k=0; k<char_bytes.length; k++)
           {
-            char_bytes[k] = buffer.get(k+j+8);
+            char_bytes[k] = buffer.get(k+j+8);  //get the character array of the file or dir that you are currently at -> (split_path[i])
           }
-
-          String path_name = new String(char_bytes);
-          if(path.equals(path_name))
-            return path_offset = buffer.getInt(j);
+          System.out.println("DEBUGG TEST: char_bytes[] :"+new String(char_bytes));       /************************/
+          path_name = new String(char_bytes);
+          if(path.equals(path_name.trim()))     //JESUS CHRIST !!! TRIM ????? REMEMBER THIS ! IMPORTANT
+          {
+            inode_of_path = buffer.getInt(j);
+            System.out.println(inode_of_path);
+            break;
+          }
+          
         }
       }
     }
-    return path_offset = 0;
+    System.out.println(inode_of_path);
+    return inode_of_path;
   }
 
 
@@ -106,14 +120,15 @@ public class FileInfo
 
   public void printBlockData(int startByte) throws IOException
   {
-    byte[] block_data = Driver.ext2.read((long)startByte*block_size, (long)block_size);
+    byte[] block_data = Driver.ext2.read(startByte*block_size, block_size);
     ByteBuffer buffer = ByteBuffer.wrap(block_data);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-    if (inode.file())
-      System.out.println(new String(block_data));
+    if (reg_file)
+      System.out.println(new String(block_data).trim());    //get rid of whitespace
     //if(inode.file() == false)
-    //{
+    else if(!reg_file)
+    {
       for(int i=0; i<buffer.limit(); i+=length)
       {
         inode_index = buffer.getInt(i);
@@ -126,7 +141,7 @@ public class FileInfo
         }
 
         int containing_block = Driver.getContainingBLock(inode_index);  //should this be an integer/double or long ?
-        byte[] other_data = Driver.ext2.read((long)containing_block, (long)block_size);
+        byte[] other_data = Driver.ext2.read(containing_block, block_size);
         Inode iData = new Inode(other_data);
         iData.read();
 
@@ -143,14 +158,14 @@ public class FileInfo
         System.out.print(g_id+"\t");
         System.out.print(size+"\t");
         System.out.print(date+"\t");
-        System.out.print(name+"\t\n");
+        System.out.print(name.trim()+"\t\n");
       }
-    //}
+    }
   }
 
   public void readIndirectData(int startByte) throws IOException
   {
-    byte[] block_data = Driver.ext2.read((long)startByte*block_size, (long)block_size);
+    byte[] block_data = Driver.ext2.read(startByte*block_size, block_size);
     ByteBuffer buffer = ByteBuffer.wrap(block_data);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -163,7 +178,7 @@ public class FileInfo
 
   public void readDblIndirectData(int startByte) throws IOException
   {
-    byte[] block_data = Driver.ext2.read((long)startByte*block_size, (long)block_size);
+    byte[] block_data = Driver.ext2.read(startByte*block_size, block_size);
     ByteBuffer buffer = ByteBuffer.wrap(block_data);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
 

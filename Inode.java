@@ -80,11 +80,7 @@ public class Inode
 
     if(((int)i_mode & IFSCK) == IFSCK) permissions="socket";
     if(((int)i_mode & IFLNK) == IFLNK) permissions="symbolic link";
-    if(((int)i_mode & IFREG) == IFREG)
-    {
-      permissions = "-";
-      reg_file = true;
-    }
+    if(((int)i_mode & IFREG) == IFREG) permissions = "-";
     if(((int)i_mode & IFBLK) == IFBLK) permissions="block device";
     if(((int)i_mode & IFDIR) == IFDIR) permissions="d";
     if(((int)i_mode & IFCHR) == IFCHR) permissions="c";
@@ -144,8 +140,11 @@ public class Inode
 		return i_size_lower;
 	}
 
-  public boolean file()
+  public boolean isFile()
   {
+    if(((int)i_mode & IFREG) == IFREG)
+      reg_file = true;
+
     return reg_file;
   }
 

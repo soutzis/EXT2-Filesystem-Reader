@@ -6,13 +6,14 @@ public class Ext2File
 {
   private Volume vol;
   private RandomAccessFile raf;
-  private String filename = "ext2fs";
   private String path;
 
   public Ext2File(Volume vol, String path)
   {
     this.vol = vol;
     this.path = path;
+    if (path.equals("/"))
+      this.path += ".";
     raf = vol.getRandomAccessFile();
   }
 
@@ -20,7 +21,8 @@ public class Ext2File
   {
     byte[] data = new byte[(int) length];
     seek(startByte);
-    raf.read(data);
+    //raf.read(data);
+    raf.readFully(data);
 
     return data;
   }
@@ -29,7 +31,8 @@ public class Ext2File
   {
     byte[] data = new byte[(int)length];
     seek(position());
-    raf.read(data);
+    //raf.read(data);
+    raf.readFully(data);
 
     return data;
   }

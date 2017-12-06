@@ -6,11 +6,12 @@ public class Driver
   static Ext2File ext2;
   static Superblock sblock;
   static GroupDescriptor gdesc;
-  static Directory direct;
+  static FileInfo info;
   static Inode inode;
-  static int block_location;
+  static int block_location, block_group_count, inode_size;
   static byte[] data;
   static String path;
+  static String[] split_path;
   static final int root_inode = 2;
   static final int block_size = 1024;
   static final long superblock_offset = 1024;
@@ -46,33 +47,42 @@ public class Driver
   //public static
   public static void main (String[] args) throws IOException
   {
-    long inode_size;
     vol = new Volume("ext2fs");
-    ext2 = new Ext2File(vol, "/");
+    ext2 = new Ext2File(vol, "/deep");
+
     path = ext2.getPath();
-    System.out.println(path);
+    split_path = path.split("/");
+    //System.out.println(path);
+
     data = ext2.read(superblock_offset, block_size);
-    System.out.println(ext2.size()+" bytes");
     sblock = new Superblock(data);
     sblock.read();
     inode_size = sblock.getInodeSize();
-    int block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup());
+    block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup());
+    //System.out.println(ext2.size()+" bytes");
+
     data = ext2.read(gdescriptor_offset,block_size);
     gdesc = new GroupDescriptor(data, block_group_count);
     gdesc.read();
     block_location = getContainingBLock(root_inode);
+    /*
+    System.out.println("The block number for root is: (integer)"+block_location);
+    System.out.println("The block number for root is: (double)"+(double)block_location);
+    System.out.println("The block number for root is: (long)"+(long)block_location);
+    */
 
     data = ext2.read(block_location, inode_size);
     inode = new Inode(data);
     inode.read();
-    FileInfo info = new FileInfo(inode, path);
-    info.checkPathName();
+
+    info = new FileInfo(inode, split_path);
+    info.getFileInfo();
     /*Inode inode = new Inode(data);
     data = ext2.read((long)rootInfo_inode, 128);
     inode.read();
-    System.out.println(inode.readPermissions()+" "+inode.getDate());*/
+    System.out.println(inode.readPermissions()+" "+inode.getDate());
 
     System.out.println("containing block is: "+block_location);
-    System.out.println("buffer pointer is: "+ext2.position());
+    System.out.println("buffer pointer is: "+ext2.position());*/
   }
 }
