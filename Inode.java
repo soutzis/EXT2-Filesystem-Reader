@@ -15,10 +15,9 @@ public class Inode
 	private short i_links_count;                //'hard link references to file' counter
   private int[]	i_block_pointer;              //direct pointers to data blocks
   private int i_size_upper;                   //file size in bytes (lower 64 bits)
-  private boolean reg_file;
+  private boolean reg_file;                   //boolean to indicate if the inode is reading a regular file
   private String file_permissions;            //the permissions mode granted to the user/group, as a readable String
   private ByteBuffer buffer;
-  //private byte[] inode_bytes;                 //byte array where the inode will be read from
 
   private int IFSCK = 0xC000;                 // Socket file mode
   private int IFLNK = 0xA000;                 // Symbolic Link file mode
@@ -46,7 +45,6 @@ public class Inode
 
   public Inode(byte[] bytes)
   {
-    //this.inode_bytes = bytes;
     buffer = ByteBuffer.wrap(bytes);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     i_block_pointer = new int[15];
@@ -125,14 +123,18 @@ public class Inode
 
   public String getUid()
   {
-		if(i_uid == 0) return "root";
-    else return "user";
+		if(i_uid == 0)
+      return "root";
+    else
+      return "user";
 	}
 
   public String getGid()
   {
-    if(i_gid == 0) return "root";
-    else return "group";
+    if(i_gid == 0)
+      return "root";
+    else
+      return "group";
 	}
 
   public int getSize()

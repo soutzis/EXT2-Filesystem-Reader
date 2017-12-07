@@ -26,14 +26,13 @@ public class Driver
     int[] group_descriptor_pointer = gdesc.getGDpointer();              //the groupdescription pointers
     int i_table_pointer;                                                //the inode table pointer of block group n.
     double pointer;                                                     //the index of the inode
-    double containing_block;                                            //the number of the block that the inode points to
-
+    double containing_block;                                            //the number of the containing block, as a double to avoid data loss
 		if (inode_index >= 2)
     {
       if(inode_index < s_inodes_count)
       {
-        inode_index -= 1; //because inodes start from 1 but something else starts from 0
-        block_group = inode_index/s_indodes_per_group; //inodes start from 1, so substracting 1 (To locate in which block this inode resides)
+        inode_index -= 1;                                               //because inodes start from 1 but something else starts from 0
+        block_group = inode_index/s_indodes_per_group;                  //inodes start from 1, so substracting 1 (To locate in which block this inode resides)
         pointer = inode_index % s_indodes_per_group;
         i_table_pointer = group_descriptor_pointer[block_group];
 			  containing_block = ((pointer * s_inode_size/block_size) + i_table_pointer) * block_size;
@@ -44,32 +43,25 @@ public class Driver
 		return 0;
 	}
 
-  //public static
   public static void main (String[] args) throws IOException
   {
     vol = new Volume("ext2fs");
-    ext2 = new Ext2File(vol, "/deep");
+    ext2 = new Ext2File(vol, "/two-cities");
+    //ext2 = new Ext2File(vol, "/deep/down/in/the/filesystem/there/lived/a/file");
 
     path = ext2.getPath();
     split_path = path.split("/");
-    //System.out.println(path);
 
     data = ext2.read(superblock_offset, block_size);
     sblock = new Superblock(data);
     sblock.read();
     inode_size = sblock.getInodeSize();
     block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup());
-    //System.out.println(ext2.size()+" bytes");
 
     data = ext2.read(gdescriptor_offset,block_size);
     gdesc = new GroupDescriptor(data, block_group_count);
     gdesc.read();
     block_location = getContainingBLock(root_inode);
-    /*
-    System.out.println("The block number for root is: (integer)"+block_location);
-    System.out.println("The block number for root is: (double)"+(double)block_location);
-    System.out.println("The block number for root is: (long)"+(long)block_location);
-    */
 
     data = ext2.read(block_location, inode_size);
     inode = new Inode(data);
@@ -77,12 +69,5 @@ public class Driver
 
     info = new FileInfo(inode, split_path);
     info.getFileInfo();
-    /*Inode inode = new Inode(data);
-    data = ext2.read((long)rootInfo_inode, 128);
-    inode.read();
-    System.out.println(inode.readPermissions()+" "+inode.getDate());
-
-    System.out.println("containing block is: "+block_location);
-    System.out.println("buffer pointer is: "+ext2.position());*/
   }
 }

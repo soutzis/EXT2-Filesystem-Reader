@@ -21,7 +21,6 @@ public class Ext2File
   {
     byte[] data = new byte[(int) length];
     seek(startByte);
-    //raf.read(data);
     raf.readFully(data);
 
     return data;
@@ -31,7 +30,6 @@ public class Ext2File
   {
     byte[] data = new byte[(int)length];
     seek(position());
-    //raf.read(data);
     raf.readFully(data);
 
     return data;

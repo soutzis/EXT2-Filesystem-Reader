@@ -10,7 +10,6 @@ public class Volume
   {
 		try
     {
-      //File file = new File(filename);
 		  raf = new RandomAccessFile(filename,"r");
       file_length = raf.length();
 		}

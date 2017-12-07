@@ -11,12 +11,9 @@ public class Superblock
   private int s_inode_size; //offset 88
   private String s_volume_name; //offset 120 (128bit)
   private ByteBuffer buffer;
-  //private byte[] superblock_bytes;
 
   public Superblock(byte[] bytes)
   {
-    //superblock_bytes = bytes;
-    //this.buffer = b;
     buffer = ByteBuffer.wrap(bytes);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
@@ -36,9 +33,9 @@ public class Superblock
 		}
     s_volume_name = new String(char_bytes);
 
-    System.out.println("magic number: 0x"+String.format("%04x", s_magic)+"\ntotal number of inodes: "+s_inodes_count+"\ntotal number of blocks: "+s_blocks_count+"\nmax number of blocks per group: "+s_blocks_per_group+"\ntotal number of groups: "+getBlockGroupCount(s_blocks_count, s_blocks_per_group));
+    /*System.out.println("magic number: 0x"+String.format("%04x", s_magic)+"\ntotal number of inodes: "+s_inodes_count+"\ntotal number of blocks: "+s_blocks_count+"\nmax number of blocks per group: "+s_blocks_per_group+"\ntotal number of groups: "+getBlockGroupCount(s_blocks_count, s_blocks_per_group));
     System.out.println("Size of each inode is: "+s_inode_size);
-    System.out.println("Volume name is\t-> "+s_volume_name+" <-");
+    System.out.println("Volume name is\t-> "+s_volume_name+" <-");*/
   }
 
   public int getInodeSize()

@@ -23,7 +23,6 @@ public class GroupDescriptor
     for (int i=0; i<group_count; i++)
     {
       gd_pointer[i] = buffer.getInt(8+table_size*i);
-      System.out.println("Block "+i+" :"+gd_pointer[i]);
     }
   }
 
