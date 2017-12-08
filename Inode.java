@@ -1,6 +1,10 @@
 import java.nio.*;
 import java.io.*;
 import java.util.*;
+/**
+*This class reads an Inode and all the metadata it provides
+*@author Petros Soutzis (p.soutzis@lancaster.ac.uk)
+*/
 
 public class Inode
 {
@@ -12,7 +16,7 @@ public class Inode
   private int i_mtime;                        //last modified
   private int	i_dtime;                        //time of file deletion
 	private short i_gid;                        //group ID of owners
-	private short i_links_count;                //'hard link references to file' counter
+	private short i_links_count;                //number of'hard link references to file'
   private int[]	i_block_pointer;              //direct pointers to data blocks
   private int i_size_upper;                   //file size in bytes (lower 64 bits)
   private boolean reg_file;                   //boolean to indicate if the inode is reading a regular file
@@ -43,14 +47,21 @@ public class Inode
   private int IWOTH = 0x0002;                 // Others wite file mode
   private int IXOTH = 0x0001;                 // Others execute file mode
 
+  /**
+  *Constructor of the inode class
+  *@param bytes is the byte array that contains the inode's data
+  */
   public Inode(byte[] bytes)
   {
     buffer = ByteBuffer.wrap(bytes);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
-    i_block_pointer = new int[15];
+    i_block_pointer = new int[15];            // The inode has 15 pointers that point to data
     reg_file = false;
   }
 
+  /**
+  *This method will read all the data that is contained in the inode, from the buffer, in which the byte array was parsed
+  */
   public void read()
   {
     i_mode = buffer.getShort(0);
@@ -72,6 +83,10 @@ public class Inode
     i_size_upper = buffer.getInt(108);
   }
 
+  /**
+  *This method uses bitwise ANDing to determing what permissions a directory or file has
+  *@return a String with the full permissions of a file or directory
+  */
   public String readPermissions()
   {
     String permissions = "";
@@ -113,14 +128,21 @@ public class Inode
     if(((int)i_mode & IXOTH) == IXOTH) permissions+="x"; else permissions+="-";
     if(((int)i_mode & ISVTX) == ISVTX) permissions+="t";
 
-    return file_permissions = permissions;
+    file_permissions = permissions;
+    return file_permissions;
   }
 
+  /**
+  *@return the array of all the data pointers in an inode
+  */
   public int[] getBlockPointers()
   {
     return i_block_pointer;
   }
 
+  /**
+  *@return If the user has root access or not
+  */
   public String getUid()
   {
 		if(i_uid == 0)
@@ -129,6 +151,9 @@ public class Inode
       return "user";
 	}
 
+  /**
+  *@return If the guest has root access or not
+  */
   public String getGid()
   {
     if(i_gid == 0)
@@ -137,11 +162,17 @@ public class Inode
       return "group";
 	}
 
+  /**
+  *@return the file size (32 bits)
+  */
   public int getSize()
   {
 		return i_size_lower;
 	}
 
+  /**
+  *@return if this is a file
+  */
   public boolean isFile()
   {
     if(((int)i_mode & IFREG) == IFREG)
@@ -150,12 +181,18 @@ public class Inode
     return reg_file;
   }
 
+  /**
+  *@return the date that this file was lastly modified
+  */
   public Date getDate()
   {
     Date d = new Date((long)i_mtime*1000);
 		return d;
 	}
 
+  /**
+  *@return the number of hard link references to a file
+  */
   public short getHardLinks()
   {
 		return i_links_count;
