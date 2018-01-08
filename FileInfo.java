@@ -69,6 +69,17 @@ public class FileInfo
     }
     if(dataexists)
     {
+      System.out.println("\nTotal number of inodes is: "+Driver.sblock.getInodeCount());
+      System.out.println("Total number of inodes per group is: "+Driver.sblock.getInodesPerGroup());
+      System.out.println("Total size of inodes is: "+Driver.inode_size);
+      System.out.println("Total number of blocks is: "+Driver.sblock.getBlocksCount());
+      System.out.println("Total number of blocks per group is: "+Driver.sblock.getBlocksPerGroup());
+      System.out.println("VOLUME NAME: "+Driver.sblock.getVolumeName());
+      System.out.println("Total number of block groups is: "+Driver.block_group_count);
+      int[] inode_table = Driver.gdesc.getGDpointer();
+      for(int i=0; i<inode_table.length; i++)
+        System.out.println("Inode Table "+(i+1)+" offset in Group Descriptor is: "+inode_table[i]);
+      System.out.print("\n");
       readBlockData(inode);
       readHexData(hex_data);
     }
@@ -208,12 +219,13 @@ public class FileInfo
         byte[] other_data = Driver.ext2.read(containing_block, inode_size);
         iData = new Inode(other_data);
         iData.read();
+        long file_size = ((long)iData.getSizeUpper() << 32) | ((long)iData.getSizeLower() & 0xFFFFFFFFL);
 
         System.out.print(iData.readPermissions()+"\t");                        //prints the metadata from the inode
         System.out.print(iData.getHardLinks()+"\t");
         System.out.print(iData.getUid()+"\t");
         System.out.print(iData.getGid()+"\t");
-        System.out.print(iData.getSize()+"\t");
+        System.out.print(file_size+"\t");
         System.out.print(iData.getDate()+"\t");
         System.out.print(new String(char_bytes).trim()+" \n");
       }
