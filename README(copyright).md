@@ -1,6 +1,8 @@
 # ext2-filesystem-reader
 java program that reads an ext2-filesystem image
 
+#IF YOU'D LIKE TO SUGGEST AN IMPROVEMENT OR A BUG-FIX, PLEASE EMAIL ME.
+
 This is the work of 'Petros Soutzis' and is protected by the 'Copyright Law' (©).
 
 This was a course assignment for Lancaster University, Computer Science undergrad. degree.
