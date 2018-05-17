@@ -38,6 +38,7 @@ public class Ext2File
   *@param length the size that the bytearray will have
   *@throws IOException e
   *@throws EOFException eof
+  *@throws FileNotFoundException fnf
   *@return the byte array that the random access file read from the volume
   */
   public byte[] read(long startByte, long length) throws IOException, EOFException, FileNotFoundException
