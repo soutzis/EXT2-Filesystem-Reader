@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.*;
 /**
 *This is the main class of the program. It provides a way to read an Ext2 Filesystem image,
 *based on the path that will be provided by the user, as a string.
@@ -7,6 +8,7 @@ import java.io.IOException;
 
 public class Driver
 {
+  static Scanner scan;
   static Volume vol;                                                  //The Volume class instance, to open the file
   static Ext2File ext2;                                               //The Ext2File class instance, to return the bytes to be read from the file
   static Superblock sblock;                                           //The Superblock class instance, which reads the superblock of the file
@@ -56,28 +58,41 @@ public class Driver
 
   public static void main (String[] args) throws IOException
   {
-    vol = new Volume("ext2fs");
-    ext2 = new Ext2File(vol, "/");
+    while(true)
+    {
+      System.out.print("Enter the path to search for: ");
+      scan = new Scanner(System.in);
+      path = scan.next();
+      if(path.equals("exit") || path.equals("quit") || path.equals("end") || path.equals("stop"))
+      {
+        System.out.print("\nExt2 filesystem image scanning was terminated by the user\n");
+        break;
+      }
+      else
+      {
+        vol = new Volume("ext2fs");
+        ext2 = new Ext2File(vol, path);
 
-    path = ext2.getPath();
-    split_path = path.split("/");
+        split_path = path.split("/");
 
-    data = ext2.read(superblock_offset, block_size);
-    sblock = new Superblock(data);
-    sblock.read();
-    inode_size = sblock.getInodeSize();
-    block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup()); //The number of block groups in the filesystem image
+        data = ext2.read(superblock_offset, block_size);
+        sblock = new Superblock(data);
+        sblock.read();
+        inode_size = sblock.getInodeSize();
+        block_group_count = sblock.getBlockGroupCount(sblock.getBlocksCount(), sblock.getBlocksPerGroup()); //The number of block groups in the filesystem image
 
-    data = ext2.read(gdescriptor_offset,block_size);
-    gdesc = new GroupDescriptor(data, block_group_count);
-    gdesc.read();
-    block_location = getContainingBLock(root_inode);                                                    //the block offset
+        data = ext2.read(gdescriptor_offset,block_size);
+        gdesc = new GroupDescriptor(data, block_group_count);
+        gdesc.read();
+        block_location = getContainingBLock(root_inode);   //the block offset
 
-    data = ext2.read(block_location, inode_size);
-    inode = new Inode(data);
-    inode.read();
+        data = ext2.read(block_location, inode_size);
+        inode = new Inode(data);
+        inode.read();
 
-    info = new FileInfo(inode, split_path);
-    info.getFileInfo();
+        info = new FileInfo(inode, split_path);
+        info.getFileInfo();
+      }
+    }
   }
 }

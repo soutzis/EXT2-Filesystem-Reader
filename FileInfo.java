@@ -52,7 +52,9 @@ public class FileInfo
   */
   public void getFileInfo() throws IOException
   {
-    for(int i=1; i<split_path.length; i++)                      //i starts from 1, because the first item in the array is whitespace
+    /*NOTE:i starts from 1, because the first item in the array is whitespace
+    */
+    for(int i=1; i<split_path.length; i++)
     {
       findPath(split_path[i]);
       if(inode_of_path == 0)
@@ -87,6 +89,7 @@ public class FileInfo
 
   /**
   *This class calculates the inode number, needed to read the data contained in the block that the inode points to
+  *If there was no match, method returns integer 0
   *@param path is the name of the directory or file to look for
   *@throws IOException e
   *@return the inode number that points to the data requested in the path
@@ -96,34 +99,46 @@ public class FileInfo
     block_pointers = inode.getBlockPointers();
     inode_of_path = 0;
 
-    for (int i=0; i<12; i++)                                                       //the names of the directories or files are small and will always be pointed by the direct pointers of the inode
+    /*the names of the directories or files are small and will
+    **always be pointed by the direct pointers of the inode*/
+    for (int i=0; i<12; i++)
     {
       if(block_pointers[i] != 0)
       {
-        byte[] data = Driver.ext2.read((block_pointers[i]*block_size), block_size); //multiplaying the block pointer offset by the max block size to get the correct offset
+        /*multiplaying the block pointer offset by the
+        **max block size to get the correct offset*/
+        byte[] data = Driver.ext2.read((block_pointers[i]*block_size), block_size);
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         rec_length = buffer.getShort(4);
 
-        for(int j=0; j<buffer.limit(); j+=rec_length)                               //Jumping +rec_length each time, to read the next name, if exists
+        /*Jumping +rec_length each time, to read the next name, if exists
+        **(check http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html Q6)
+        **rec_length is the value for jumping to the next directory location*/
+        for(int j=0; j<buffer.limit(); j+=rec_length)
         {
-          rec_length = buffer.getShort(j+one_byte);                                 //The value for jumping to the next directory location
+          rec_length = buffer.getShort(j+one_byte);
           name_length = buffer.get(j+one_byte+half_byte);
-          char_bytes = new byte[name_length];                                       //(check http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html Q6)
+          char_bytes = new byte[name_length];
+          /*get the character array, the file or directory
+          **name for split_path[i]*/
           for(int k=0; k<char_bytes.length; k++)
           {
-            char_bytes[k] = buffer.get(k+j+two_bytes);                              //get the character array, the file or directory name for split_path[i]
+            char_bytes[k] = buffer.get(k+j+two_bytes);
           }
-
-          if(path.equals(new String(char_bytes).trim()))                            //TRIM REMOVES WHITESPACE, to check if the one provided with the one discovered are equal
+          /*TRIM REMOVES WHITESPACE, to check if the pathname
+          **entered with the one discovered are 'equal'.
+          **If they are 'equal',it retrieves the number of the inode
+          **and then exits this loop*/
+          if(path.equals(new String(char_bytes).trim()))
           {
-            inode_of_path = buffer.getInt(j);                                       //get the number of the inode and exit this loop
+            inode_of_path = buffer.getInt(j);
             break;
           }
         }
       }
     }
-    return inode_of_path;                                                           //returns integer 0 to indicate that there was no match
+    return inode_of_path;
   }
 
   /**
@@ -188,12 +203,12 @@ public class FileInfo
   */
   public void printBlockData(int startByte) throws IOException
   {
-    byte[] block_data = Driver.ext2.read(startByte*block_size, block_size);       //mulitplying offset by 1024, to get the correct block number (the correct offset)
+    byte[] block_data = Driver.ext2.read(startByte*block_size, block_size);  //mulitplying offset by 1024, to get the correct block number (the correct offset)
     hex_data.add(block_data);
 
     if (reg_file)
     {
-      String str = new String(block_data).trim();                                //the bytes converting to a String and trim() removes whitespace
+      String str = new String(block_data).trim(); //the bytes converting to a String and trim() removes whitespace
       System.out.print(str);
     }
 
@@ -206,13 +221,13 @@ public class FileInfo
       for(int i=0; i<buffer.limit(); i+=dir_length)
       {
         inode_index = buffer.getInt(i);
-        dir_length = buffer.getShort(i+one_byte);                              //because the index is 4bytes long
-        namelength = buffer.get(i+one_byte+half_byte);                         // 8 bits in size, located after dir_length in the
+        dir_length = buffer.getShort(i+one_byte);      //because the index is 4bytes long
+        namelength = buffer.get(i+one_byte+half_byte); // 8 bits in size, located after dir_length in the
         byte[] char_bytes = new byte[namelength];
 
         for(int j=0; j<char_bytes.length; j++)
         {
-          char_bytes[j] = buffer.get(j+i+two_bytes);                           //fetch each char in the char_array of bytes
+          char_bytes[j] = buffer.get(j+i+two_bytes);  //fetch each char in the char_array of bytes
         }
 
         int containing_block = Driver.getContainingBLock(inode_index);
@@ -221,7 +236,7 @@ public class FileInfo
         iData.read();
         long file_size = ((long)iData.getSizeUpper() << 32) | ((long)iData.getSizeLower() & 0xFFFFFFFFL);
 
-        System.out.print(iData.readPermissions()+"\t");                        //prints the metadata from the inode
+        System.out.print(iData.readPermissions()+"\t");//prints the metadata from the inode
         System.out.print(iData.getHardLinks()+"\t");
         System.out.print(iData.getUid()+"\t");
         System.out.print(iData.getGid()+"\t");
@@ -282,7 +297,7 @@ public class FileInfo
     for(int i=0; i<buffer.limit(); i+=one_byte)
     {
       if(buffer.getInt(i) != 0)
-        readDblIndirectData(buffer.getInt(i));     //print contents of file or directory data
+        readDblIndirectData(buffer.getInt(i)); //print contents of file or directory data
     }
   }
 }

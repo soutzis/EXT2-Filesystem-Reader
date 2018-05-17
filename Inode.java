@@ -17,10 +17,8 @@ public class Inode
   private int	i_dtime;                        //time of file deletion
 	private short i_gid;                        //group ID of owners
 	private short i_links_count;                //number of'hard link references to file'
-  private int[]	i_block_pointer;              //direct pointers to data blocks
+  private int[]	i_block_pointer;              //pointers to data blocks or to other pointer blocks
   private int i_size_upper;                   //file size in bytes (lower 64 bits)
-  private boolean reg_file;                   //boolean to indicate if the inode is reading a regular file
-  private String file_permissions;            //the permissions mode granted to the user/group, as a readable String
   private ByteBuffer buffer;
 
   private int IFSCK = 0xC000;                 // Socket file mode
@@ -55,8 +53,7 @@ public class Inode
   {
     buffer = ByteBuffer.wrap(bytes);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
-    i_block_pointer = new int[15];            // The inode has 15 pointers that point to data
-    reg_file = false;
+    i_block_pointer = new int[15]; // The inode has 15 pointers that point to data
   }
 
   /**
@@ -73,18 +70,13 @@ public class Inode
     i_dtime = buffer.getInt(20);
     i_gid = buffer.getShort(24);
     i_links_count = buffer.getShort(26);
-    for(int i=0; i<12; i++)
-    {
-      i_block_pointer[i] = buffer.getInt(40 + (i*4));
-    }
-    i_block_pointer[12] = buffer.getInt(88);
-    i_block_pointer[13] = buffer.getInt(92);
-    i_block_pointer[14] = buffer.getInt(96);
+    for(int i=0; i<15; i++) i_block_pointer[i] = buffer.getInt(40 + (i*4));
     i_size_upper = buffer.getInt(108);
   }
 
   /**
-  *This method uses bitwise ANDing to determing what permissions a directory or file has
+  *This method uses bitwise ANDing on FileSystem's i_mode variable value,
+  *to determing what permissions a directory or file has.
   *@return a String with the full permissions of a file or directory
   */
   public String readPermissions()
@@ -99,37 +91,23 @@ public class Inode
     if(((int)i_mode & IFCHR) == IFCHR) permissions="c";
     if(((int)i_mode & IFIFO) == IFIFO) permissions="fifo";
 
-    if(((int)i_mode & IRUSR) == IRUSR) permissions+="r"; else permissions+="-";
-    if(((int)i_mode & IWUSR) == IWUSR) permissions+="w"; else permissions+="-";
-    if(((int)i_mode & IXUSR) == IXUSR) permissions+="x";
-    if(((int)i_mode & ISUID) == ISUID)
-    {
-      if(permissions.endsWith("x"))
-      {
-        permissions = permissions.substring(0, permissions.length() - 1);
-        permissions+="s";
-      }
-      else permissions+="-";
-    }
-    if(((int)i_mode & IRGRP) == IRGRP) permissions+="r"; else permissions+="-";
-    if(((int)i_mode & IWGRP) == IWGRP) permissions+="w"; else permissions+="-";
-    if(((int)i_mode & IXGRP) == IXGRP) permissions+="x";
-    if(((int)i_mode & ISGID) == ISGID)
-    {
-      if(permissions.endsWith("x"))
-      {
-        permissions = permissions.substring(0, permissions.length() - 1);
-        permissions+="s";
-      }
-      else permissions+="-";
-    }
-    if(((int)i_mode & IROTH) == IROTH) permissions+="r"; else permissions+="-";
-    if(((int)i_mode & IWOTH) == IWOTH) permissions+="w"; else permissions+="-";
-    if(((int)i_mode & IXOTH) == IXOTH) permissions+="x"; else permissions+="-";
-    if(((int)i_mode & ISVTX) == ISVTX) permissions+="t";
+    //USER GROUP PERMISSIONS
+    permissions += ((int)i_mode & IRUSR) == IRUSR ? "r" : "-";
+    permissions += ((int)i_mode & IWUSR) == IWUSR ? "w" : "-";
+    permissions += ((int)i_mode & IXUSR) == IXUSR ? "x" : "-";
 
-    file_permissions = permissions;
-    return file_permissions;
+    //GROUP PERMISSIONS
+    permissions += ((int)i_mode & IRGRP) == IRGRP ? "r" : "-";
+    permissions += ((int)i_mode & IWGRP) == IWGRP ? "w" : "-";
+    permissions += ((int)i_mode & IXGRP) == IXGRP ? "x" : "-";
+
+    //OTHER GROUP PERMISSIONS
+    permissions += ((int)i_mode & IROTH) == IROTH ? "r" : "-";
+    permissions += ((int)i_mode & IWOTH) == IWOTH ? "w" : "-";
+    permissions += ((int)i_mode & IXOTH) == IXOTH ? "x" : "-";
+    permissions += ((int)i_mode & ISVTX) == ISVTX ? "t" : "";
+
+    return permissions;
   }
 
   /**
@@ -145,10 +123,7 @@ public class Inode
   */
   public String getUid()
   {
-		if(i_uid == 0)
-      return "root";
-    else
-      return "user";
+    return i_uid == 0 ? "root" : "user";
 	}
 
   /**
@@ -156,29 +131,32 @@ public class Inode
   */
   public String getGid()
   {
-    if(i_gid == 0)
-      return "root";
-    else
-      return "group";
+    return i_gid == 0 ? "root" : "group";
 	}
 
   /**
-  *@return the file size (32 bits)
+  *@return the file size (lower 32 bits)
   */
-  public int getSize()
+  public int getSizeLower()
   {
 		return i_size_lower;
 	}
+
+  /**
+  *@return the file size (upper 32 bits)
+  */
+  public int getSizeUpper()
+  {
+    return i_size_upper;
+  }
 
   /**
   *@return if this is a file
   */
   public boolean isFile()
   {
-    if(((int)i_mode & IFREG) == IFREG)
-      reg_file = true;
-
-    return reg_file;
+    //boolean is primitive, so used method Boolean
+    return new Boolean(((int)i_mode & IFREG) == IFREG ? true : false);
   }
 
   /**
@@ -186,8 +164,7 @@ public class Inode
   */
   public Date getDate()
   {
-    Date d = new Date((long)i_mtime*1000);
-		return d;
+		return new Date((long)i_mtime*1000);
 	}
 
   /**

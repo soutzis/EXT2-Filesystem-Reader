@@ -11,19 +11,23 @@ public class Ext2File
 {
   private Volume vol;
   private RandomAccessFile raf;
-  private String path;
 
   /**
   *Constructor of Ext2File class
+  *Will fix minor errors of the path input by the user
   *@param vol is the Volume that the Ext2File will read bytes from
   *@param path is the path that the user will input and the program will read from
   */
   public Ext2File(Volume vol, String path)
   {
     this.vol = vol;
-    this.path = path;
-    if (path.equals("/"))
-      this.path += ".";
+    String temp_path = path;
+
+    temp_path += path.equals("/") ? "." : "";
+    temp_path = path.endsWith("/")? path.substring(0, path.lastIndexOf('/')) : path ;
+    temp_path = (!path.startsWith("/")) ? "/" + path : path;
+
+    Driver.path = temp_path;
     raf = vol.getRandomAccessFile();
   }
 
@@ -36,7 +40,7 @@ public class Ext2File
   *@throws EOFException eof
   *@return the byte array that the random access file read from the volume
   */
-  public byte[] read(long startByte, long length) throws IOException, EOFException
+  public byte[] read(long startByte, long length) throws IOException, EOFException, FileNotFoundException
   {
     byte[] data = new byte[(int) length];
     seek(startByte);
@@ -86,13 +90,5 @@ public class Ext2File
   public long size() throws IOException
   {
     return vol.getLength();
-  }
-
-  /**
-  *@return The path requested by the user
-  */
-  public String getPath()
-  {
-    return path;
   }
 }
