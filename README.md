@@ -1,5 +1,6 @@
-# ext2-filesystem-reader
-ext2 filesystem reader, written purely in Java
+# EXT2-Filesystem Reader
+
+A program written purely in Java, that can read the contents of an ext2-filesystem image, given a path.
 
 This was a term-project for module 'Operating Systems' at Lancaster University.
 
@@ -11,11 +12,11 @@ contents of the file.
 
 2. To exit the program, the user can type, 'end', 'exit', 'quit' or 'stop'.
 
-#IF YOU'D LIKE TO SUGGEST AN IMPROVEMENT OR A BUG-FIX, PLEASE EMAIL ME.
+# Suggestions
 
-This is the work of 'Petros Soutzis' and is protected by the 'Copyright Law' (©).
+IF YOU'D LIKE TO SUGGEST AN IMPROVEMENT OR A BUG-FIX, PLEASE CONTACT ME.
 
-This was a course assignment for Lancaster University, Computer Science undergrad. degree. You may download, read and run the program for educational purposes only. Using this code for anything but educational purposes (e.g. commercial use), without my knowledge is strictly prohibited. Parsing this work as your own, or plagiarizing and embedding this to your own code is prohibited.
+This was a course assignment for Lancaster University, Computer Science undergrad degree. You may download, read and run the program for educational purposes only. Using this code for anything but educational purposes (e.g. commercial use), without my knowledge is strictly prohibited. Parsing this work as your own, or plagiarizing and embedding this to your own code is prohibited.
 
 -Unpublished work Copyright (©), December 2017, Petros Soutzis. All Rights Reserved.
 
