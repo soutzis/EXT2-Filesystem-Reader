@@ -1,111 +1,135 @@
 import java.nio.*;
-import java.io.*;
+
 /**
-*This class reads the data of an ext2 filesystem's SuperBlock
-*@author Petros Soutzis (p.soutzis@lancaster.ac.uk)
-*/
+ *This class reads the data of an ext2 filesystem's SuperBlock
+ *@author Petros Soutzis, 2017-19
+ */
 
-public class Superblock
-{
-  private short s_magic;                              //the magic number which should always be 0xef53 for an ext2 filesystem
-  private int s_inodes_count;                         //Total number of inodes in filesystem
-  private int s_blocks_count;                         //Total number of blocks in filesystem
-  private int s_blocks_per_group;                     //Number of blocks per Group
-  private int s_indodes_per_group;                    //Number of inodes per Group
-  private int s_inode_size;                           //Size of each inode in bytes
-  private String s_volume_name;                       //Volume label (disk name)
-  private ByteBuffer buffer;                          //ByteBuffer, where the bytes to be read, will be parsed to
+@SuppressWarnings("FieldCanBeLocal")
+public class Superblock {
+    //the magic number which should always be 0xef53 for an ext2 filesystem
+    private short sMagic;
+    //Total number of inodes in filesystem
+    private int inodeCount;
+    //Total number of blocks in filesystem
+    private int blockCount;
+    //Number of blocks per Group
+    private int blocksPerGroup;
+    //Number of inodes per Group
+    private int inodesPerGroup;
+    //Size of each inode in bytes
+    private int sInodeSize;
+    //Volume label (disk name)
+    private String volumeName;
+    //ByteBuffer, where the bytes to be read, will be parsed to
+    private ByteBuffer buffer;
 
-  /**
-  *Constructor of the Superblock class
-  *@param bytes is the byte array that contains the Superblock's data
-  */
-  public Superblock(byte[] bytes)
-  {
-    buffer = ByteBuffer.wrap(bytes);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-	}
+    /*Offset Constants for extracting the information from the SuperBlock*/
+    private final int S_MAGIC_OFFSET = 56;
+    private final int S_INODE_COUNT_OFFSET = 0;
+    private final int S_BLOCK_COUNT_OFFSET = 4;
+    private final int S_BLOCKS_PER_GROUP_OFFSET = 32;
+    private final int S_INODES_PER_GROUP_OFFSET = 40;
+    private final int S_INODE_SIZE_OFFSET = 88;
+    private final int S_FILESYSTEM_NAME_OFFSET = 120;
+    private final int S_FILESYSTEM_NAME_LENGTH = 16;
 
-  /**
-  *This method will read all the data that is contained in the Superblock,
-  *from the buffer in which the byte array was parsed
-  */
-  public void read()
-  {
-    s_magic = buffer.getShort(56);
-    s_inodes_count = buffer.getInt(0);
-		s_blocks_count = buffer.getInt(4);
-		s_blocks_per_group = buffer.getInt(32);
-		s_indodes_per_group = buffer.getInt(40);
-		s_inode_size = buffer.getInt(88);
-    byte[] char_bytes = new byte[16];
-    for(int i=0;i<16; i++)
-    {
-			char_bytes[i]=buffer.get(120+i);
-		}
 
-    s_volume_name = new String(char_bytes);              //converting the bytes that contain the name to a String
-  }
+    /**
+     *Constructor of the Superblock class
+     *@param bytes is the byte array that contains the Superblock's data
+     */
+    public Superblock(byte[] bytes) {
+        buffer = ByteBuffer.wrap(bytes);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+    }
 
-  /**
-  *@return The total size of each Inode
-  */
-  public int getInodeSize()
-  {
-    return s_inode_size;
-  }
+    /**
+     *This method will read all the data that is contained in the Superblock,
+     *from the buffer in which the byte array was parsed
+     */
+    public void read() {
+        sMagic = buffer.getShort(S_MAGIC_OFFSET);
+        inodeCount = buffer.getInt(S_INODE_COUNT_OFFSET);
+        blockCount = buffer.getInt(S_BLOCK_COUNT_OFFSET);
+        blocksPerGroup = buffer.getInt(S_BLOCKS_PER_GROUP_OFFSET);
+        inodesPerGroup = buffer.getInt(S_INODES_PER_GROUP_OFFSET);
+        sInodeSize = buffer.getInt(S_INODE_SIZE_OFFSET);
 
-  /**
-  *@return The total number of inodes in filesystem
-  */
-  public int getInodeCount()
-  {
-    return s_inodes_count;
-  }
+        //Get the Volume name
+        byte[] char_bytes = new byte[S_FILESYSTEM_NAME_LENGTH];
 
-  /**
-  *@return The total number of inodes in every block group
-  */
-  public int getInodesPerGroup()
-  {
-    return s_indodes_per_group;
-  }
+        for(int i=0; i<S_FILESYSTEM_NAME_LENGTH; i++) {
+            //Get the characters 1 by 1
+            char_bytes[i]=buffer.get(S_FILESYSTEM_NAME_OFFSET + i);
+        }
 
-  /**
-  *@return The total number of blocks in filesystem
-  */
-  public int getBlocksCount()
-  {
-    return s_blocks_count;
-  }
+        //converting the bytes that contain the name to a String
+        volumeName = new String(char_bytes);
+    }
 
-  /**
-  *@return The total number of blocks in every block group
-  */
-  public int getBlocksPerGroup()
-  {
-    return s_blocks_per_group;
-  }
+    /**
+     *@return The total size of each Inode
+     */
+    int getInodeSize() {
 
-  /**
-  *@return The disk's name
-  */
-  public String getVolumeName()
-  {
-    return s_volume_name;
-  }
+        return sInodeSize;
+    }
 
-  /**
-  *@param num_of_blocks the total number of blocks in the filesystem
-  *@param blocks_per_group the total number of blocks in every block group
-  *@return The total number of block groups that the volume has
-  */
-  public int getBlockGroupCount(int num_of_blocks, int blocks_per_group)
-  {
-    int count = num_of_blocks/blocks_per_group;
-    if((num_of_blocks % blocks_per_group) > 0) count++;
+    /**
+     *@return The total number of inodes in filesystem
+     */
+    int getInodeCount() {
 
-    return count;
-  }
+        return inodeCount;
+    }
+
+    /**
+     *@return The total number of inodes in every block group
+     */
+    int getInodesPerGroup() {
+
+        return inodesPerGroup;
+    }
+
+    /**
+     *@return The total number of blocks in filesystem
+     */
+    int getBlockCount() {
+
+        return blockCount;
+    }
+
+    /**
+     *@return The total number of blocks in every block group
+     */
+    int getBlocksPerGroup() {
+
+        return blocksPerGroup;
+    }
+
+    /**
+     *@return The disk's name
+     */
+    String getVolumeName() {
+
+        return volumeName;
+    }
+
+    /**
+     *@param num_of_blocks the total number of blocks in the filesystem
+     *@param blocks_per_group the total number of blocks in every block group
+     *@return The total number of block groups that the volume has
+     */
+    int getBlockGroupCount(int num_of_blocks, int blocks_per_group) {
+        //Get the total number of blocks, divided with the number of blocks per group
+        int count = num_of_blocks/blocks_per_group;
+
+        //If the remainder of the above division is not 0, then add "1" to the count.
+        if((num_of_blocks % blocks_per_group) != 0)
+            count++;
+
+        return count;
+    }
 
 }
