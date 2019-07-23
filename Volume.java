@@ -18,10 +18,13 @@ public class Volume {
     *@param filename is the name of the file that will be accessed randomly
     */
     public Volume(String filename) {
+        System.out.println("\nReading ext2 image..\n");
 		try {
 		    raf = new RandomAccessFile(filename,"r");
 		}
 		catch(IOException e) {
+            System.out.println("\nSomething went wrong, could not read file." +
+                    "Please check if a file called \""+filename+"\" exists.");
 			e.printStackTrace();
 		}
     }

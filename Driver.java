@@ -22,8 +22,6 @@ public class Driver {
     private static final long SUPERBLOCK_OFFSET = 1024;
     //The offset byte at which the Group Descriptor starts at
     private static final long GDESCRIPTOR_OFFSET = 2048;
-    //The hardcoded application version.
-    private static final String VERSION = "1.2";
 
     static boolean DEBUG = false;
 
@@ -77,14 +75,19 @@ public class Driver {
         return 0;
     }
 
+    static String calculateCurrentPath(String input){
+        return null;
+    }
+
     // Main method of program
+    //TODO Make the passing of the file as a runtime argument. User will have to enter the image name
+    //FIXME, need currentDir to be retrieved correctly
     public static void main (String[] args) throws IOException {
 
         String[] exitCommands = {"exit", "quit", "end", "stop"};
-        String currentDir = null, promptSymbol = " >> ";
+        String currentDir = "~", promptSymbol = "$ ";
 
-        System.out.println("EXT2 FILESYSTEM READER " + Driver.VERSION);
-        System.out.println("\nReading ext2 image..\n");
+        System.out.println("EXT2 Filesystem Reader version " + Metadata.VERSION);
 
         //Initialize a Volume instance and pass it to the Ext2File constructor, to read the ext2 fs image
         Volume vol = new Volume("ext2fs");
@@ -130,7 +133,7 @@ public class Driver {
         Inode currentInode = new Inode(rootInodeData);
         currentInode.read();
 
-        currentDir = "root";  // FIXME. This HAS to be retrieved dynamically! (100% required)
+        //currentDir = "root";
 
         while(true) {
             //Get the user input
