@@ -1,12 +1,10 @@
 import java.nio.*;
-import java.io.*;
 import java.util.*;
 /**
  *This class reads an Inode and all the metadata it provides
  *@author Petros Soutzis (p.soutzis@lancaster.ac.uk)
  */
 
-@SuppressWarnings({"FieldCanBeLocal", "Duplicates"})
 public class Inode
 {
     private short i_mode; //file mode
@@ -21,48 +19,7 @@ public class Inode
     private int[] i_block_pointer; //pointers to data blocks or to other pointer blocks
     private int i_size_upper; //file size in bytes (lower 64 bits)
 
-    private ByteBuffer buffer; // The ByteBuffer to hold the data read from the inode
-
-    private final int INODE_POINTERS_COUNT = 15; // The inode has 15 pointers that point to data
-    private final int NUMBER_OF_GROUPS = 3; // root, user, other
-
-    /*INODE FILE MODES*/
-    private final int IFSCK = 0xC000;  // Socket file mode
-    private final int IFLNK = 0xA000;  // Symbolic Link file mode
-    private final int IFREG = 0x8000;  // Regular File file mode
-    private final int IFBLK = 0x6000;  // Block Device file mode
-    private final int IFDIR = 0x4000;  // Directory file mode
-    private final int IFCHR = 0x2000;  // Character Device file mode
-    private final int IFIFO = 0x1000;  // FIFO file mode
-
-    private final int ISUID = 0x0800;  // Set process User ID file mode
-    private final int ISGID = 0x0400;  // Set process Group ID file mode
-    private final int ISVTX = 0x0200;  // Sticky bit file mode
-
-    private final int IRUSR = 0x0100;  // User read file mode
-    private final int IWUSR = 0x0080;  // User write file mode
-    private final int IXUSR = 0x0040;  // User execute file mode
-
-    private final int IRGRP = 0x0020;  // Group read file mode
-    private final int IWGRP = 0x0010;  // Group write file mode
-    private final int IXGRP = 0x0008;  // Group execute file mode
-
-    private final int IROTH = 0x0004;  // Others read file mode
-    private final int IWOTH = 0x0002;  // Others write file mode
-    private final int IXOTH = 0x0001;  // Others execute file mode
-
-    /*Inode Information Offset Constants*/
-    private final int I_MODE_OFFSET = 0;
-    private final int I_UID_OFFSET = 2;
-    private final int I_SIZE_LOWER_OFFSET = 4;
-    private final int I_ACCESS_TIME_OFFSET = 8;
-    private final int I_CREATION_TIME_OFFSET = 12;
-    private final int I_MODIFICATION_TIME_OFFSET = 16;
-    private final int I_DELETION_TIME_OFFSET = 20;
-    private final int I_GID_OFFSET = 24;
-    private final int I_LINKS_COUNT_OFFSET = 26;
-    private final int I_BLOCK_POINTERS_OFFSET = 40;
-    private final int I_SIZE_UPPER_OFFSET = 108;
+    private ByteBuffer buffer; // The ByteBuffer to hold the data readBytes from the inode
 
 
     /**
@@ -72,27 +29,27 @@ public class Inode
     public Inode(byte[] bytes) {
         buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        i_block_pointer = new int[INODE_POINTERS_COUNT];
+        i_block_pointer = new int[Constants.INODE_POINTERS_COUNT];
     }
 
     /**
-     *This method will read all the data that is contained in the inode, from the buffer, in which the byte array was parsed
+     *This method will readBytes all the data that is contained in the inode, from the buffer, in which the byte array was parsed
      */
     public void read() {
-        i_mode = buffer.getShort(I_MODE_OFFSET);
-        i_uid = buffer.getShort(I_UID_OFFSET);
-        i_size_lower = buffer.getInt(I_SIZE_LOWER_OFFSET);
-        i_atime = buffer.getInt(I_ACCESS_TIME_OFFSET);
-        i_ctime = buffer.getInt(I_CREATION_TIME_OFFSET);
-        i_mtime = buffer.getInt(I_MODIFICATION_TIME_OFFSET);
-        i_dtime = buffer.getInt(I_DELETION_TIME_OFFSET);
-        i_gid = buffer.getShort(I_GID_OFFSET);
-        i_links_count = buffer.getShort(I_LINKS_COUNT_OFFSET);
+        i_mode = buffer.getShort(Constants.I_MODE_OFFSET);
+        i_uid = buffer.getShort(Constants.I_UID_OFFSET);
+        i_size_lower = buffer.getInt(Constants.I_SIZE_LOWER_OFFSET);
+        i_atime = buffer.getInt(Constants.I_ACCESS_TIME_OFFSET);
+        i_ctime = buffer.getInt(Constants.I_CREATION_TIME_OFFSET);
+        i_mtime = buffer.getInt(Constants.I_MODIFICATION_TIME_OFFSET);
+        i_dtime = buffer.getInt(Constants.I_DELETION_TIME_OFFSET);
+        i_gid = buffer.getShort(Constants.I_GID_OFFSET);
+        i_links_count = buffer.getShort(Constants.I_LINKS_COUNT_OFFSET);
 
         for(int i=0; i<15; i++)
-            i_block_pointer[i] = buffer.getInt(I_BLOCK_POINTERS_OFFSET + (i*4));
+            i_block_pointer[i] = buffer.getInt(Constants.I_BLOCK_POINTERS_OFFSET + (i*4));
 
-        i_size_upper = buffer.getInt(I_SIZE_UPPER_OFFSET);
+        i_size_upper = buffer.getInt(Constants.I_SIZE_UPPER_OFFSET);
     }
 
     /**
@@ -104,42 +61,87 @@ public class Inode
     {
         String permissions = "";
 
-        if(((int)i_mode & IFSCK) == IFSCK)
+        if(((int)i_mode & Constants.IFSCK) == Constants.IFSCK)
             permissions = "socket";
-        else if(((int)i_mode & IFLNK) == IFLNK)
+        else if(((int)i_mode & Constants.IFLNK) == Constants.IFLNK)
             permissions = "symbolic link";
-        else if(((int)i_mode & IFREG) == IFREG)
+        else if(((int)i_mode & Constants.IFREG) == Constants.IFREG)
             permissions = "-";
-        else if(((int)i_mode & IFBLK) == IFBLK)
+        else if(((int)i_mode & Constants.IFBLK) == Constants.IFBLK)
             permissions = "block device";
-        else if(((int)i_mode & IFDIR) == IFDIR)
+        else if(((int)i_mode & Constants.IFDIR) == Constants.IFDIR)
             permissions = "d";
-        else if(((int)i_mode & IFCHR) == IFCHR)
+        else if(((int)i_mode & Constants.IFCHR) == Constants.IFCHR)
             permissions = "c";
-        else if(((int)i_mode & IFIFO) == IFIFO)
+        else if(((int)i_mode & Constants.IFIFO) == Constants.IFIFO)
             permissions = "fifo";
 
-//        int[] permissionsForEachGroup = {
-//                IRUSR, IWUSR, IXUSR, IRGRP, IWGRP, IXGRP, IROTH, IWOTH, IXOTH
-//        };
-
         //USER GROUP PERMISSIONS
-        permissions += ((int)i_mode & IRUSR) == IRUSR ? "r" : "-";
-        permissions += ((int)i_mode & IWUSR) == IWUSR ? "w" : "-";
-        permissions += ((int)i_mode & IXUSR) == IXUSR ? "x" : "-";
+        permissions += ((int)i_mode & Constants.IRUSR) == Constants.IRUSR ? "r" : "-";
+        permissions += ((int)i_mode & Constants.IWUSR) == Constants.IWUSR ? "w" : "-";
+        permissions += ((int)i_mode & Constants.IXUSR) == Constants.IXUSR ? "x" : "-";
 
         //GROUP PERMISSIONS
-        permissions += ((int)i_mode & IRGRP) == IRGRP ? "r" : "-";
-        permissions += ((int)i_mode & IWGRP) == IWGRP ? "w" : "-";
-        permissions += ((int)i_mode & IXGRP) == IXGRP ? "x" : "-";
+        permissions += ((int)i_mode & Constants.IRGRP) == Constants.IRGRP ? "r" : "-";
+        permissions += ((int)i_mode & Constants.IWGRP) == Constants.IWGRP ? "w" : "-";
+        permissions += ((int)i_mode & Constants.IXGRP) == Constants.IXGRP ? "x" : "-";
 
         //OTHER GROUP PERMISSIONS
-        permissions += ((int)i_mode & IROTH) == IROTH ? "r" : "-";
-        permissions += ((int)i_mode & IWOTH) == IWOTH ? "w" : "-";
-        permissions += ((int)i_mode & IXOTH) == IXOTH ? "x" : "-";
-        permissions += ((int)i_mode & ISVTX) == ISVTX ? "t" : "";
+        permissions += ((int)i_mode & Constants.IROTH) == Constants.IROTH ? "r" : "-";
+        permissions += ((int)i_mode & Constants.IWOTH) == Constants.IWOTH ? "w" : "-";
+        permissions += ((int)i_mode & Constants.IXOTH) == Constants.IXOTH ? "x" : "-";
+        permissions += ((int)i_mode & Constants.ISVTX) == Constants.ISVTX ? "t" : "";
 
         return permissions;
+    }
+
+    /**
+     *A static method, used for fetching the block number (offset), that an inode points to. Otherwise, it returns 0
+     *@param rootInodeOffset The number of the inode, with which this method will calculate the containing block number
+     *@return the offset of the containing block
+     */
+    static int getContainingBlock(int rootInodeOffset, Superblock superblock, GroupDescriptor groupDescriptor) {
+
+        //Total number of inodes in the filesystem
+        int inodeCount = superblock.getInodeCount();
+        //Total number of inodes per block group
+        int inodesPerGroup = superblock.getInodesPerGroup();
+        //Size of inodes, as readBytes from the superblock
+        int inodeSize = superblock.getInodeSize();
+
+        //The block group that the inode resides in
+        int pointerDiv;
+        //the group descriptor table pointers
+        int[] gDescPointer = groupDescriptor.getGDescPointer();
+        //the inode table pointer of block group n.
+        int inodeTablePointer;
+        //the index of the inode as a double to avoid data loss, when calculating for block group 0
+        double pointer;
+        //the number of the containing block, as a double to avoid data loss, when calculating for block group 0
+        double containingBlock;
+
+        //only perform calculations for inodes 2 and up. 2 Because inodes start from 1.
+        //But the pointer returned will be 0 for the first block.
+        if (rootInodeOffset >= 2) {
+            //validate inode index, by checking if it is not any bigger that the total number of inodes
+            if(rootInodeOffset < inodeCount) {
+                //because inodes start counting from 1, but start from 0 in the inode table
+                rootInodeOffset -= 1;
+                //dividing the inode number with the number of inodes per group,
+                //to get the index of the inode in the Descriptor table
+                pointerDiv = rootInodeOffset/inodesPerGroup;
+                //the remainder of the above equation will be
+                //used in calculating the containing block below. http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html
+                pointer = rootInodeOffset % inodesPerGroup;
+                inodeTablePointer = gDescPointer[pointerDiv];
+                containingBlock = ((pointer*inodeSize/Constants.BLOCK_SIZE)+inodeTablePointer) * Constants.BLOCK_SIZE;
+
+                //convert to int to return
+                return (int)containingBlock;
+            }
+        }
+        //otherwise return 0, which is the first block
+        return 0;
     }
 
     /**
@@ -181,7 +183,7 @@ public class Inode
      *@return true, if this is a file. Otherwise, return false.
      */
     public boolean isFile() {
-        return ((int) i_mode & IFREG) == IFREG;
+        return ((int) i_mode & Constants.IFREG) == Constants.IFREG;
     }
 
     /**
