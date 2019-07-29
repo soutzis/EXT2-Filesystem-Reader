@@ -175,7 +175,7 @@ public class Inode
 
             } else {
                 System.out.println("No such file or directory");
-                return inode;
+                return null;
             }
         }
         return currentInode;

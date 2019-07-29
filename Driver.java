@@ -34,6 +34,9 @@ public class Driver {
 
         Inode currentInode = Inode.getContainingInode(pathArray, inodeSize, ext2, inode, sBlock, groupDesc);
 
+        if(currentInode == null)
+            return;
+
         //determine what command it is and act appropriately
         switch (command){
             case Command.EXIT:
@@ -51,8 +54,13 @@ public class Driver {
                 inode = currentInode;
                 if(path.equals(".."))
                     currentDir = previousDir;
-                else
-                    currentDir = currentDir+"/"+path;
+                else {
+                    previousDir = currentDir;
+                    if(currentDir.equals("/"))
+                        currentDir = currentDir + path;
+                    else
+                        currentDir = currentDir + "/" + path;
+                }
                 break;
 
             default:
@@ -61,7 +69,6 @@ public class Driver {
     }
 
     // Main method of program
-    //FIXME NEED TO RETRIEVE CURRENTDIR CORRECTLY
     public static void main (String[] args) throws IOException {
         running = true;
         String compName = getComputerName(), promptSymbol = "$ ";
