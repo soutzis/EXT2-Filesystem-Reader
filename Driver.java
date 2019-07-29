@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.*;
+
 /**
  *This is the main class of the program. It provides a way to readBytes an Ext2 Filesystem image,
  *based on the path that will be provided by the user, as a string.
@@ -7,38 +8,64 @@ import java.util.*;
  */
 
 public class Driver {
-    static boolean debug = false;
-    static boolean running = false;
+    static Inode inode = null;
+    static String currentDir = "/", previousDir="/";
+    //static boolean debug = false;
+    private static boolean running = false;  //could be only in main(), but was added in 'getCommandAndExecute()'
 
-    static String getCommandAndExecute(String input){
-        String cmd = (input.trim().substring(0, input.trim().indexOf(" ")));
+    private static String getComputerName() {
+        Map<String, String> env = System.getenv();
+        if (env.containsKey("USER"))
+            return env.get("USER")+":";
+        else return env.getOrDefault("USERNAME", "UnknownHost")+":";
+    }
+
+    private static void getCommandAndExecute(String input, int inodeSize,
+                                             Superblock sBlock, GroupDescriptor groupDesc, Ext2File ext2)
+    throws IOException{
+        String manySpacesRegex = " +";
+        String[] inputPipeline = (input.replaceAll(manySpacesRegex, " ")).trim().split(" ");
+
+        String command = inputPipeline[0], path = inputPipeline.length > 1 ? inputPipeline[1] : ".";
+        String[] pathArray = path.split("/");
+        pathArray = Arrays.stream(pathArray)
+                .filter(s -> s.length() > 0)
+                .toArray(String[]::new);
+
+        Inode currentInode = Inode.getContainingInode(pathArray, inodeSize, ext2, inode, sBlock, groupDesc);
 
         //determine what command it is and act appropriately
-        switch (cmd){
+        switch (command){
             case Command.EXIT:
                 running = false;
                 Command.doExit();
                 break;
+            case Command.LS:
+                Command.doLs(currentInode, inodeSize, ext2, sBlock, groupDesc, pathArray[pathArray.length-1]);
+                break;
+            case Command.CAT:
+                Command.doCat(currentInode, inodeSize, ext2, sBlock, groupDesc, pathArray[pathArray.length-1]);
+                break;
             case Command.CD:
+                currentInode.read();
+                inode = currentInode;
+                if(path.equals(".."))
+                    currentDir = previousDir;
+                else
+                    currentDir = currentDir+"/"+path;
+                break;
 
             default:
-                System.out.println(cmd+": command not found");
-                return null;
+                System.out.println(command+": command not found");
         }
-        return null;
-    }
-
-    static String calculateCurrentPath(String input){
-        return null;
     }
 
     // Main method of program
-    //TODO Make the passing of the file as a runtime argument. User will have to enter the image name
-    //FIXME, need currentDir to be retrieved correctly
+    //FIXME NEED TO RETRIEVE CURRENTDIR CORRECTLY
     public static void main (String[] args) throws IOException {
         running = true;
-        String currentDir = "~", promptSymbol = "$ ";
-        System.out.println("EXT2 Filesystem Reader version " + Metadata.VERSION);
+        String compName = getComputerName(), promptSymbol = "$ ";
+        System.out.println("EXT2 Filesystem Reader version " + Metadata.VERSION + " BY P.SOUTZIS");
 
         //Initialize a Volume instance and pass it to the Ext2File constructor, to readBytes the ext2 fs image
         Volume vol = new Volume("ext2fs");
@@ -74,34 +101,16 @@ public class Driver {
         //Initialize root inode
         byte[] rootInodeData = ext2.readBytes(rootInodeBlockNumber, inodeSize);
         //Contains pointers to the filesystem blocks, which contain the data
-        Inode currentInode = new Inode(rootInodeData);
-        currentInode.read();
+        inode = new Inode(rootInodeData);
+        inode.read();
 
         while(running) {
             //Get the user input
-            System.out.print("\n"+currentDir+promptSymbol);
+            System.out.print("\n"+compName+currentDir+promptSymbol);
             Scanner scan = new Scanner(System.in);
             String input = scan.nextLine();
 
-            //The path that the program will readBytes from
-            String path = "";
-
-            //Error check and correction for user input
-            if(input.equals("/"))
-                path = "/.";
-            else if(input.endsWith("/"))
-                path = input.substring(0, input.lastIndexOf('/'));
-            else if((!input.startsWith("/")))
-                path = "/"+input;
-
-            //An array of strings, with each string consisting of the names of the path's directories or files
-            String[] pathArray = path.split("/");
-
-            //Will locate data based on the path (array of directory names and/or file name)
-            FileInfo info = new FileInfo(currentInode, inodeSize, sBlock, groupDesc, ext2);
-            info.getFileInfo(pathArray);
-            currentInode = info.getFileInode();
-            currentDir += info.getFilePath();  //FIXME (this is obviously incorrect. Leave it for now, fix later)
+            getCommandAndExecute(input, inodeSize, sBlock, groupDesc, ext2);
         }
     }
 }

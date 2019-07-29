@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.*;
 import java.util.*;
 /**
@@ -93,6 +94,91 @@ public class Inode
         permissions += ((int)i_mode & Constants.ISVTX) == Constants.ISVTX ? "t" : "";
 
         return permissions;
+    }
+
+    /**
+     *This class calculates the inode number, needed to readBytes the data contained in the block that the inode points to
+     *If there was no match, method returns integer 0
+     *@param path is the name of the directory or file to look for
+     *@throws IOException e
+     *@return the inode number that points to the data requested in the path
+     */
+    private static int findInodeOffset(String path, Inode inode, Ext2File ext2) throws IOException {
+        int[] blockPointers = inode.getBlockPointers();
+        int noData = 0;
+
+        /*the names of the directories or files are small and will
+         **always be pointed by the direct pointers of the inode*/
+        for (int i=0; i<12; i++) {
+            //if blockPointer[i] is not equal to 0, then data exists.
+            if(blockPointers[i] != 0) {
+                /*multiplying the block pointer offset by the
+                 **max block size to get the correct offset*/
+                byte[] data = ext2.readBytes((blockPointers[i]* Constants.BLOCK_SIZE), Constants.BLOCK_SIZE);
+                ByteBuffer buffer = ByteBuffer.wrap(data);
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+                short recLength;
+
+                /*Jumping + recLength each time, to readBytes the next name, if exists
+                 * (check http://cs.smith.edu/~nhowe/262/oldlabs/ext2.html Q6)
+                 * recLength is the value for jumping to the next directory location*/
+                for(int j=0; j<buffer.limit(); j+=recLength) {
+                    //recLength is used to update record length (the loop's step)
+                    recLength = buffer.getShort(j + Constants.BYTE_LENGTH);
+                    //used set the length of the bytearray holding the matches the searched path's name
+                    byte[] nameBytes = new byte[buffer.get(j + Constants.BYTE_LENGTH + Constants.SHORT_LENGTH)];
+
+                    //retrieve each byte of the name
+                    for(int k = 0; k < nameBytes.length; k++) {
+                        nameBytes[k] = buffer.get(k + j + (Constants.BYTE_LENGTH * 2));
+                    }
+
+                    /* TRIM REMOVES WHITESPACE, to check if the pathname
+                     * entered with the one discovered are 'equal'.
+                     * If they are 'equal',it retrieves the number of the inode
+                     * and then exits this loop*/
+                    if(path.equals(new String(nameBytes).trim())) {
+                        return buffer.getInt(j);
+                    }
+                }
+            }
+        }
+        // if nothing is matched, then return no data!
+        return noData;
+    }
+
+    /**
+     * This method will  get the number of the inode, if the names
+     * in pathArray array match the names in the volume
+     * If the inode number is 0, the program will be terminated.
+     * The method will then parse the bytes to readBytes, to the Inode instance, by calculating
+     * the offset based on the inode number that the path returns.
+     * If data exists, this method will call the readBlockData() method,
+     * to readBytes and print the data in a human-readable way and then it will call the readHexData,
+     * in order to readBytes and print that same data in Hexadecimal format
+     *@param pathArray is the array of names of directories and files, that the
+     *@throws IOException ioe
+     */
+    static Inode getContainingInode(String[] pathArray, int inodeSize, Ext2File ext2, Inode inode,
+                             Superblock superblock, GroupDescriptor groupDescriptor) throws IOException {
+        Inode currentInode = inode;
+        for (String fragment : pathArray) {
+            int inodeOffset = findInodeOffset(fragment, currentInode, ext2);
+            // Check if path does exist and if not, print an error message (bad path); then exit the loop
+            if (inodeOffset > 0) {
+                //Get the inode data from the containing block, given the inode number retrieved initially in loop.
+                byte[] inodeData = ext2.readBytes(
+                        (Inode.getContainingBlock(inodeOffset, superblock, groupDescriptor)), inodeSize
+                );
+                currentInode = new Inode(inodeData);
+                currentInode.read();
+
+            } else {
+                System.out.println("No such file or directory");
+                return inode;
+            }
+        }
+        return currentInode;
     }
 
     /**
