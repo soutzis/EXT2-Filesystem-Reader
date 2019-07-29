@@ -1,6 +1,6 @@
 import java.nio.*;
 import java.io.*;
-import java.util.*;
+
 /**
  *This is a class that will readBytes each directory or file name in a path, and if that pathname exists
  *in the volume, it will readBytes and print the data contained there; both in UTF-8 and Hexadecimal.
@@ -9,31 +9,31 @@ import java.util.*;
 
 public class FileInfo {
 
-    /**
-     *This method will readBytes byte arrays from a list of byte arrays and print the content in a
-     *readable Hexadecimal format, with 26 hex characters in each line for readability
-     *@param raw is the ArrayList with bytes that this method will readBytes and print as hex
-     */
-    void readHexData(ArrayList<byte[]> raw) {
-        int counter = 0;
-        System.out.print("\n\nHex representation:\n");
-        for (byte[] data : raw) {
-            for (byte datum : data) {
-                if (counter % 26 == 0 && counter != 0) {
-                    System.out.print("\n");
-                }
-                if (datum != 0x00) {
-                    System.out.print(String.format("%02X ", datum));
-                    counter += 1;
-                }
-            }
-            while(counter%26 != 0) {
-                System.out.print("XX ");
-                counter += 1;
-            }
-        }
-        System.out.println("\n");
-    }
+//    /**
+//     *This method will readBytes byte arrays from a list of byte arrays and print the content in a
+//     *readable Hexadecimal format, with 26 hex characters in each line for readability
+//     *@param raw is the ArrayList with bytes that this method will readBytes and print as hex
+//     */
+//    void readHexData(ArrayList<byte[]> raw) {
+//        int counter = 0;
+//        System.out.print("\n\nHex representation:\n");
+//        for (byte[] data : raw) {
+//            for (byte datum : data) {
+//                if (counter % 26 == 0 && counter != 0) {
+//                    System.out.print("\n");
+//                }
+//                if (datum != 0x00) {
+//                    System.out.print(String.format("%02X ", datum));
+//                    counter += 1;
+//                }
+//            }
+//            while(counter%26 != 0) {
+//                System.out.print("XX ");
+//                counter += 1;
+//            }
+//        }
+//        System.out.println("\n");
+//    }
 
     static void readDirectoryData(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
                                   GroupDescriptor groupDescriptor, String path) throws IOException {

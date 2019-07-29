@@ -8,8 +8,8 @@ import java.util.*;
  */
 
 public class Driver {
-    static Inode inode = null;
-    static String currentDir = "/", previousDir="/";
+    private static Inode inode = null;
+    private static String currentDir = "/", previousDir="/";
     //static boolean debug = false;
     private static boolean running = false;  //could be only in main(), but was added in 'getCommandAndExecute()'
 
@@ -18,6 +18,18 @@ public class Driver {
         if (env.containsKey("USER"))
             return env.get("USER")+":";
         else return env.getOrDefault("USERNAME", "UnknownHost")+":";
+    }
+
+    private static void getCurrentPathName(String path) {
+        if(path.equals(".."))
+            currentDir = previousDir;
+        else {
+            previousDir = currentDir;
+            if(currentDir.equals("/"))
+                currentDir = currentDir + path;
+            else
+                currentDir = currentDir + "/" + path;
+        }
     }
 
     private static void getCommandAndExecute(String input, int inodeSize,
@@ -52,15 +64,7 @@ public class Driver {
             case Command.CD:
                 currentInode.read();
                 inode = currentInode;
-                if(path.equals(".."))
-                    currentDir = previousDir;
-                else {
-                    previousDir = currentDir;
-                    if(currentDir.equals("/"))
-                        currentDir = currentDir + path;
-                    else
-                        currentDir = currentDir + "/" + path;
-                }
+                getCurrentPathName(path);
                 break;
 
             default:

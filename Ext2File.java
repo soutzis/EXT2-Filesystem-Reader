@@ -27,7 +27,7 @@ public class Ext2File
      *@throws IOException is thrown when an error happens during the reading of the RAF
      *@return the byte array that the random access file readBytes from the volume
      */
-    public byte[] readBytes(long startByte, long length) throws IOException{
+    byte[] readBytes(long startByte, long length) throws IOException{
         byte[] data = new byte[(int) length];
         raf.seek(startByte);
         raf.readFully(data);
@@ -35,17 +35,17 @@ public class Ext2File
         return data;
     }
 
-    /**
-     *Reads at most length bytes, starting from the current file pointer.
-     *@param length the size that the byte-array will have
-     *@throws IOException e
-     *@return the byte array that the random access file readBytes from the volume
-     */
-    public byte[] readBytes(long length) throws IOException {
-        byte[] data = new byte[(int)length];
-        raf.seek(raf.getFilePointer());
-        raf.readFully(data);
-
-        return data;
-    }
+//    /**
+//     *Reads at most length bytes, starting from the current file pointer.
+//     *@param length the size that the byte-array will have
+//     *@throws IOException e
+//     *@return the byte array that the random access file readBytes from the volume
+//     */
+//    public byte[] readBytes(long length) throws IOException {
+//        byte[] data = new byte[(int)length];
+//        raf.seek(raf.getFilePointer());
+//        raf.readFully(data);
+//
+//        return data;
+//    }
 }
