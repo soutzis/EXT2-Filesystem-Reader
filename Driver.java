@@ -63,8 +63,12 @@ public class Driver {
                 break;
             case Command.CD:
                 currentInode.read();
-                inode = currentInode;
-                getCurrentPathName(path);
+                if(currentInode.isFile())
+                    System.out.println("Not a directory");
+                else {
+                    inode = currentInode;
+                    getCurrentPathName(path);
+                }
                 break;
 
             default:
