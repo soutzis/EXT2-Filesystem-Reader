@@ -83,7 +83,8 @@ public class Driver {
         System.out.println("EXT2 Filesystem Reader version " + Metadata.VERSION + " BY P.SOUTZIS");
 
         //Initialize a Volume instance and pass it to the Ext2File constructor, to readBytes the ext2 fs image
-        Volume vol = new Volume("ext2fs");
+        String fsName = Ext2File.getFileSystemName();
+        Volume vol = new Volume(fsName);
         Ext2File ext2 = new Ext2File(vol);
 
         //Byte array to hold the data of the SuperBlock, as returned by Ext2File's readBytes() method

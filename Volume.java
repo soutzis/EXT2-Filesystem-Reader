@@ -23,9 +23,9 @@ public class Volume {
 		    raf = new RandomAccessFile(filename,"r");
 		}
 		catch(IOException e) {
-            System.out.println("\nSomething went wrong, could not readBytes file." +
-                    "Please check if a file called \""+filename+"\" exists.");
-			e.printStackTrace();
+            System.out.println("\nSomething went wrong, could not find file.\n" +
+                    "Please check if a file called \""+filename+"\" exists, or if the path is correct.");
+            System.exit(0);
 		}
     }
 

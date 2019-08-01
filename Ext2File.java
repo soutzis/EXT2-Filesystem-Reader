@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 /**
  *This class provides a way to readBytes bytes in a Randomly Accessed File, either from a given offset
@@ -33,6 +34,14 @@ public class Ext2File
         raf.readFully(data);
 
         return data;
+    }
+
+    static String getFileSystemName(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the name of the filesystem image (or the full path if not in the same folder).");
+        System.out.print("FS Name: ");
+
+        return scanner.nextLine();
     }
 
 //    /**
