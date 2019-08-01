@@ -7,7 +7,7 @@ import java.nio.*;
 
 public class GroupDescriptor
 {
-    private ByteBuffer buffer;
+    private ByteBuffer buffer; //A bytebuffer to hold the group descriptor data
     private int groupCount;  //The number of block groups
     private int[] gdPointer; //array Inode tables pointers
 
@@ -21,13 +21,14 @@ public class GroupDescriptor
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         this.groupCount = groupCount;
         gdPointer = new int[groupCount];
+        read(); //init
     }
 
     /**
      *This method reads the group descriptor for each block group and adds the offset
      *of the inode table pointer to the gdPointer[] array
      */
-    public void read()
+    private void read()
     {
         int gdSize = 32; //each inode table is 32bytes long
         int inodeTablePointerOffset = 8;

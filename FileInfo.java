@@ -1,5 +1,6 @@
 import java.nio.*;
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  *This is a class that will readBytes each directory or file name in a path, and if that pathname exists
@@ -9,46 +10,40 @@ import java.io.*;
 
 public class FileInfo {
 
-//    /**
-//     *This method will readBytes byte arrays from a list of byte arrays and print the content in a
-//     *readable Hexadecimal format, with 26 hex characters in each line for readability
-//     *@param raw is the ArrayList with bytes that this method will readBytes and print as hex
-//     */
-//    void readHexData(ArrayList<byte[]> raw) {
-//        int counter = 0;
-//        System.out.print("\n\nHex representation:\n");
-//        for (byte[] data : raw) {
-//            for (byte datum : data) {
-//                if (counter % 26 == 0 && counter != 0) {
-//                    System.out.print("\n");
-//                }
-//                if (datum != 0x00) {
-//                    System.out.print(String.format("%02X ", datum));
-//                    counter += 1;
-//                }
-//            }
-//            while(counter%26 != 0) {
-//                System.out.print("XX ");
-//                counter += 1;
-//            }
-//        }
-//        System.out.println("\n");
-//    }
+    /**
+     *This method will readBytes byte arrays from a list of byte arrays and print the content in a
+     *readable Hexadecimal format, with 26 hex characters in each line for readability
+     *@param raw is the ArrayList with bytes that this method will readBytes and print as hex
+     */
+     void readHexData(ArrayList<byte[]> raw) {
+        int counter = 0;
+        System.out.print("\n\nHex representation:\n");
+        for (byte[] data : raw) {
+            for (byte datum : data) {
+                if (counter % 26 == 0 && counter != 0) {
+                    System.out.print("\n");
+                }
+                if (datum != 0x00) {
+                    System.out.print(String.format("%02X ", datum));
+                    counter += 1;
+                }
+            }
+            while(counter%26 != 0) {
+                System.out.print("XX ");
+                counter += 1;
+            }
+        }
+        System.out.println("\n");
+    }
 
     static void readDirectoryData(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
                                   GroupDescriptor groupDescriptor, String path) throws IOException {
-        inode.read();
 
-        if(inode.isFile())
-            System.out.println(path+": Not a directory.");
-        else
-            readBlockData(inode, inode.isFile(), inodeSize, ext2, superblock, groupDescriptor);
+         readBlockData(inode, inode.isFile(), inodeSize, ext2, superblock, groupDescriptor);
     }
 
     static void readFileData(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
                                   GroupDescriptor groupDescriptor, String path) throws IOException {
-        inode.read();
-
         if(!inode.isFile())
             System.out.println(path+": Is a directory.");
         else
@@ -119,16 +114,18 @@ public class FileInfo {
                 
                 byte[] otherData = ext2.readBytes(containingBlock, inodeSize);
                 Inode iData = new Inode(otherData);
-                iData.read();
+                //Get the correct size of the file
                 long fileSize = ((long)iData.getSizeUpper() << 32) | ((long)iData.getSizeLower() & 0xFFFFFFFFL);
 
-                System.out.print(iData.readPermissions()+"\t");//prints the metadata from the inode
-                System.out.print(iData.getHardLinks()+"\t");
-                System.out.print(iData.getUid()+"\t");
-                System.out.print(iData.getGid()+"\t");
-                System.out.print(fileSize+"\t");
-                System.out.print(iData.getDate()+"\t");
-                System.out.print(new String(charBytes).trim()+" \n");
+                // Print inode metadata (permissions, date created, etc..)
+                System.out.format("%-12s\t%-4d\t%-7s\t%-7s\t%-7d\t%-30s\t%-30s%n",
+                        iData.readPermissions(),
+                        iData.getHardLinks(),
+                        iData.getUid(),
+                        iData.getGid(),
+                        fileSize,
+                        iData.getDate(),
+                        new String(charBytes).trim());
             }
         }
     }

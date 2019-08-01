@@ -12,6 +12,8 @@ public class Constants {
     static final int BYTE_LENGTH = 4;
     //equivalent of 16 bits in bytes (a short)
     static final int SHORT_LENGTH = 2;
+    //Root symbol
+    static final String ROOT = "/";
 
 
     /*Offset Constants for extracting the information from the SuperBlock*/

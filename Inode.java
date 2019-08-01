@@ -11,10 +11,10 @@ public class Inode
     private short i_mode; //file mode
     private short i_uid; //user ID
     private int	i_size_lower; //file size in bytes (lower 32 bits)
-//    private int i_atime; //time of last access
-//    private int	i_ctime; //creation time
+    private int i_atime; //time of last access
+    private int	i_ctime; //creation time
     private int i_mtime; //last modified
-//    private int	i_dtime; //time of file deletion
+    private int	i_dtime; //time of file deletion
     private short i_gid; //group ID of owners
     private short i_links_count; //number of'hard link references to file'
     private int[] i_block_pointer; //pointers to data blocks or to other pointer blocks
@@ -31,19 +31,20 @@ public class Inode
         buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         i_block_pointer = new int[Constants.INODE_POINTERS_COUNT];
+        read(); //init
     }
 
     /**
      *This method will readBytes all the data that is contained in the inode, from the buffer, in which the byte array was parsed
      */
-    public void read() {
+    private void read() {
         i_mode = buffer.getShort(Constants.I_MODE_OFFSET);
         i_uid = buffer.getShort(Constants.I_UID_OFFSET);
         i_size_lower = buffer.getInt(Constants.I_SIZE_LOWER_OFFSET);
-//        i_atime = buffer.getInt(Constants.I_ACCESS_TIME_OFFSET);
-//        i_ctime = buffer.getInt(Constants.I_CREATION_TIME_OFFSET);
+        i_atime = buffer.getInt(Constants.I_ACCESS_TIME_OFFSET);
+        i_ctime = buffer.getInt(Constants.I_CREATION_TIME_OFFSET);
         i_mtime = buffer.getInt(Constants.I_MODIFICATION_TIME_OFFSET);
-//        i_dtime = buffer.getInt(Constants.I_DELETION_TIME_OFFSET);
+        i_dtime = buffer.getInt(Constants.I_DELETION_TIME_OFFSET);
         i_gid = buffer.getShort(Constants.I_GID_OFFSET);
         i_links_count = buffer.getShort(Constants.I_LINKS_COUNT_OFFSET);
 
@@ -276,7 +277,7 @@ public class Inode
      *@return the date that this file was lastly modified
      */
     public Date getDate() {
-        return new Date((long)i_mtime*1000);
+        return new Date((long)i_ctime*1000);
     }
 
     /**

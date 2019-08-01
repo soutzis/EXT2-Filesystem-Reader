@@ -18,7 +18,7 @@ public class Volume {
     *@param filename is the name of the file that will be accessed randomly
     */
     public Volume(String filename) {
-        System.out.println("\nReading ext2 image..\n");
+        System.out.println("\nReading EXT2 File-System image..\n");
 		try {
 		    raf = new RandomAccessFile(filename,"r");
 		}
@@ -34,6 +34,7 @@ public class Volume {
     *@return the Randomly Accessible file
     */
     RandomAccessFile getRandomAccessFile() {
+
         return raf;
     }
 }

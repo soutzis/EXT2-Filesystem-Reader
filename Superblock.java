@@ -31,13 +31,14 @@ public class Superblock {
     public Superblock(byte[] bytes) {
         buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
+        read(); //init
     }
 
     /**
      *This method will readBytes all the data that is contained in the Superblock,
      *from the buffer in which the byte array was parsed
      */
-    public void read() {
+    private void read() {
         sMagic = buffer.getShort(Constants.S_MAGIC_OFFSET);
         inodeCount = buffer.getInt(Constants.S_INODE_COUNT_OFFSET);
         blockCount = buffer.getInt(Constants.S_BLOCK_COUNT_OFFSET);
