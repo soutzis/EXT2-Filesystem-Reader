@@ -4,7 +4,7 @@ A program written purely in Java, that can read the contents of an ext2-filesyst
 
 The program has no GUI.
 
-STEP-BY-STEP WALKTHROUGH COMING SOON!
+STEP-BY-STEP WALKTHROUGH COMING SOON [HERE](https://soutzis.github.io/EXT2-Filesystem-Reader/)!
 
 # Suggestions
 
