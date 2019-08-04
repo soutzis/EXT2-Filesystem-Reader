@@ -118,7 +118,7 @@ public class FileInfo {
                 long fileSize = ((long)iData.getSizeUpper() << 32) | ((long)iData.getSizeLower() & 0xFFFFFFFFL);
 
                 // Print inode metadata (permissions, date created, etc..)
-                System.out.format("%-12s\t%-4d\t%-7s\t%-7s\t%-7d\t%-30s\t%-30s%n",
+                System.out.format("%-12s\t%-4d\t%-7s\t%-7s\t%-12d %-30s\t%-30s%n",
                         iData.readPermissions(),
                         iData.getHardLinks(),
                         iData.getUid(),
