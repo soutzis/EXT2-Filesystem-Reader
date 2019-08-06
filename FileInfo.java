@@ -3,9 +3,8 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- *This is a class that will readBytes each directory or file name in a path, and if that pathname exists
- *in the volume, it will readBytes and print the data contained there; both in UTF-8 and Hexadecimal.
- *@author Petros Soutzis, 2017-19
+ * This class has methods for reading the contents of the disk.
+ *@author Petros Soutzis
  */
 
 public class FileInfo {
@@ -36,12 +35,31 @@ public class FileInfo {
         System.out.println("\n");
     }
 
+    /**
+     * This method will be used to display contents of a directory
+     * @param inode The inode of the given path
+     * @param inodeSize The size of the inode
+     * @param ext2 The disk
+     * @param superblock The superblock
+     * @param groupDescriptor The group descriptor
+     * @throws IOException If the disk can't be read
+     */
     static void readDirectoryData(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
-                                  GroupDescriptor groupDescriptor, String path) throws IOException {
+                                  GroupDescriptor groupDescriptor) throws IOException {
 
          readBlockData(inode, inode.isFile(), inodeSize, ext2, superblock, groupDescriptor);
     }
 
+    /**
+     * This method will be used to print the contents of a file
+     * @param inode The inode of the given path
+     * @param inodeSize The size of the inode
+     * @param ext2 The disk
+     * @param superblock The superblock
+     * @param groupDescriptor The group descriptor
+     * @param path The path that was entered by the user
+     * @throws IOException If the disk can't be read
+     */
     static void readFileData(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
                                   GroupDescriptor groupDescriptor, String path) throws IOException {
         if(!inode.isFile())

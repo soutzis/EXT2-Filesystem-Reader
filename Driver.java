@@ -14,6 +14,9 @@ public class Driver {
     //static boolean debug = false;
     private static boolean running = false;  //could be only in main(), but was added in 'getCommandAndExecute()'
 
+    /**
+     * @return An identifier for the computer that currently runs the program
+     */
     private static String getComputerName() {
         Map<String, String> env = System.getenv();
         if (env.containsKey("USER"))
@@ -102,7 +105,7 @@ public class Driver {
                 if(currentInode.isFile())
                     System.out.println(pathArray[pathArray.length-1]);
                 else
-                    Command.doLs(currentInode, inodeSize, ext2, sBlock, groupDesc, pathArray[pathArray.length-1]);
+                    Command.doLs(currentInode, inodeSize, ext2, sBlock, groupDesc);
                 break;
             case Command.CAT:
                 Command.doCat(currentInode, inodeSize, ext2, sBlock, groupDesc, pathArray[pathArray.length-1]);

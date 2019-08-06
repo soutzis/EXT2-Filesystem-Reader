@@ -36,9 +36,12 @@ public class Ext2File
         return data;
     }
 
+    /**
+     * @return The name (or pathname) of the disk to read (filesystem image).
+     */
     static String getFileSystemName(){
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the name of the filesystem image (or the full path if not in the same folder).");
+        System.out.println("Enter the name of the disk to read (or the full path if not in the same folder).");
         System.out.print("FS Name: ");
 
         return scanner.nextLine();

@@ -25,12 +25,11 @@ class Command{
      * @param ext2 The Ext2File instance to provide a bytebuffer to use
      * @param superblock The superblock instance
      * @param groupDescriptor The group descriptor instance
-     * @param path The path the user issued "ls" to
      */
     static void doLs(Inode inode, int inodeSize, Ext2File ext2, Superblock superblock,
-                     GroupDescriptor groupDescriptor, String path){
+                     GroupDescriptor groupDescriptor){
         try {
-            FileInfo.readDirectoryData(inode, inodeSize, ext2, superblock, groupDescriptor, path);
+            FileInfo.readDirectoryData(inode, inodeSize, ext2, superblock, groupDescriptor);
         } catch (IOException e) {
             e.printStackTrace();
         }

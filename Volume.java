@@ -7,11 +7,7 @@ import java.io.*;
 */
 
 public class Volume {
-    //variable that holds the total length of the file
-    //private long fileLength;
-    //Class that provides the random access functionality
     private RandomAccessFile raf;
-
 
     /**
     *Constructor of the Volume Class

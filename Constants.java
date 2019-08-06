@@ -1,3 +1,8 @@
+/**
+ * This class contains constants (macros) that are used throughout the program.
+ *
+ * @author Petros Soutzis
+ */
 public class Constants {
 
     //The capacity of each block in the volume
