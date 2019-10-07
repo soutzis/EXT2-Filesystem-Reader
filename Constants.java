@@ -5,6 +5,8 @@
  */
 public class Constants {
 
+    //The magic number, which is always 0xef53
+    static final short MAGIC_NUM_VALUE = (short) 0xef53;
     //The capacity of each block in the volume
     static final int BLOCK_SIZE = 1024;
     //The offset of the inode that holds all the information about other inodes.

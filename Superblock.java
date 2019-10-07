@@ -106,6 +106,11 @@ public class Superblock {
         return volumeName;
     }
 
+    String shortToHex(Short s){
+        String transformed = Integer.toHexString(s-0xffff0000); //remove first 16 bits, to get the value of short 's'
+        return "0x" + transformed;
+    }
+
     /**
      *@param num_of_blocks the total number of blocks in the filesystem
      *@param blocks_per_group the total number of blocks in every block group
@@ -123,8 +128,13 @@ public class Superblock {
     }
 
     void printGenericData(int inodeSize, int blockGroupCount){
+        boolean correctMagicNum = Constants.MAGIC_NUM_VALUE == sMagic;
         System.out.println("VOLUME NAME: " + volumeName);
-        System.out.println("Magic number is: " + sMagic);
+        System.out.print("Magic number is: " + shortToHex(sMagic));
+        if(correctMagicNum)
+            System.out.println(" -> Magic number is OK.");
+        else
+            System.out.println(" -> Magic number is INVALID, possible corruption of files.");
         System.out.println("Total number of inodes is: " + inodeCount);
         System.out.println("Total number of inodes per group is: " + inodesPerGroup);
         System.out.println("Total size of inodes is: " + inodeSize);

@@ -30,10 +30,9 @@ public class Driver {
      */
     private static void getCurrentPathName(String[] pathArray) {
         for(String path : pathArray){
-            if(path.equals("..") && !pathStack.peek().equals(Constants.ROOT)) {
+            if(path.equals("..") && !pathStack.peek().equals(Constants.ROOT))
                pathStack.pop();
-            }
-            else if(!path.equals(".")){
+            else if(!path.equals(".") && !path.equals("..")){
                 if(pathStack.peek().equals("/"))
                     pathStack.push(path);
                 else
