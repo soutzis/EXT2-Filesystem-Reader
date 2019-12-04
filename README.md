@@ -1,6 +1,6 @@
 # Release
 You can find the latest release [here](https://github.com/soutzis/EXT2-Filesystem-Reader/releases).
-> The ext2-filesystem image does not come bundled within the release. You can use "ext2img" which is included with the source-code in /master ([link](https://github.com/soutzis/EXT2-Filesystem-Reader/blob/master/ext2img)), or just use your own.
+> The ext2-filesystem image does not come bundled within the release. You can use "[ext2img](https://github.com/soutzis/EXT2-Filesystem-Reader/blob/master/ext2img)" which is included with the source-code in /master, or just use your own.
 
 # Usage Instructions
 Just run the .jar from the latest release (command: *java -jar ext2reader.jar*) and you will be asked to provide the path to your ext2-filesystem image.
