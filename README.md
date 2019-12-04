@@ -7,11 +7,11 @@ Just run the .jar from the latest release (command: *java -jar ext2reader.jar*) 
 
 # Overview
 ***EXT2 Filesystem Reader*** is a program written in pure Java, that can read the contents of an ext2-filesystem
-image and output that data in a style that imitates the Linux terminal.
+image and output that data in a style that imitates a GNU/Linux terminal.
 This implementation only supports little-endian format.
 
-The most recent version supports the following commands, that once again
-try to imitate the way that they work on the Linux kernel:
+The most recent version supports the following commands/utilities, that once again
+try to imitate the way that the original GNU utilities work:
 
 1. **cd**
 2. **ls**
