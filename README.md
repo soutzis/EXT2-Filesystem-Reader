@@ -9,7 +9,7 @@ Just run the .jar from the latest release (command: *java -jar ext2reader.jar*) 
 ***EXT2 Filesystem Reader*** is a program written in pure Java, that can read the contents of an **ext2** filesystem
 image. It imitates some of the core utilities of GNU.
 
-The most recent version implements the following GNU commands/utilities, but currently there is no support for *options* (flags):
+The most recent version implements the following GNU commands/utilities, but currently there is no support for *options* (flags) or pipes:
 
 1. **cd**
 2. **ls**
