@@ -1,5 +1,8 @@
 # Release
-You can find the latest release [here](https://github.com/soutzis/EXT2-Filesystem-Reader/releases).
+You can find the latest release [here](https://github.com/soutzis/EXT2-Filesystem-Reader/releases). 
+
+The source code in this repository uses the "unlicense" license (see [here](https://github.com/soutzis/EXT2-Filesystem-Reader/blob/master/LICENSE)). Basically you can do whatever the f*** you want with it, thanks to my dear friends Andrew and Mark being complete d*cks. Enjoy!
+
 > The ext2-filesystem image does not come bundled within the release. You can use "[ext2img](https://github.com/soutzis/EXT2-Filesystem-Reader/blob/master/ext2img)" which was taken from [this repository](https://github.com/Matoran/ext2-reader) and is included with the source-code in /master, or just use your own.
 
 # Usage Instructions
