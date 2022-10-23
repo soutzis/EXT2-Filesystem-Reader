@@ -29,4 +29,4 @@ The first 1024 bytes of an ext2 disk is the **boot block**, hence the **super-bl
 The contents of the boot-block are reserved for the partition boot sectors and are unused by the Ext2 filesystem 
 ([taken from here](http://cs.smith.edu/~nhowe/Teaching/csc262/oldlabs/ext2.html)).
 
-STEP-BY-STEP WALKTHROUGH COMING SOON [HERE](https://soutzis.github.io/EXT2-Filesystem-Reader/)!
+I had started writing a walkthrough **[here](https://soutzis.github.io/EXT2-Filesystem-Reader/)**, but I have no free time to do it now and won't ever update it. If anyone wants to contribute and do it, then feel free to contact me/open a pull request. Andrew and Mark, love ya boys!
